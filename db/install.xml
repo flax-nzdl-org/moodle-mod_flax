@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/flax/db" VERSION="2007101301" COMMENT="XMLDB file for Moodle mod/flax"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+	<TABLES>
+		<TABLE NAME="flax"
+			COMMENT="Each record in this table represents either a FLAX language exercise, or a FLAX language resource article."
+			NEXT="flax_questions">
+			<FIELDS>
+				<FIELD NAME="id" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" SEQUENCE="true" NEXT="name" />
+				<FIELD NAME="name" 
+					TYPE="char" LENGTH="255" NOTNULL="true"
+					SEQUENCE="false" PREVIOUS="id" NEXT="course" />
+				<FIELD NAME="course" 
+					COMMENT="This integer course attribute will be replaced by the actual db record $course in flax_base constructor (in flax_base.php)"
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					SEQUENCE="false" PREVIOUS="name" NEXT="collection" />
+				<FIELD NAME="collection" 
+					COMMENT="name of the collection that this exercise is based on"
+					TYPE="char" LENGTH="255" NOTNULL="true"
+					SEQUENCE="false" PREVIOUS="course" NEXT="flaxtype" />
+				<FIELD NAME="flaxtype" 
+					COMMENT="exercise or resource"
+					TYPE="char" LENGTH="25" NOTNULL="true" DEFAULT="exercise" 
+					SEQUENCE="false" PREVIOUS="collection" NEXT="flaxurl" />
+				<FIELD NAME="flaxurl" 
+					TYPE="text" LENGTH="small" NOTNULL="true" 
+					SEQUENCE="false" PREVIOUS="flaxtype" NEXT="docid" />
+				<FIELD NAME="docid" COMMENT="flaxdl document id" NOTNULL="false" TYPE="char" LENGTH="255"
+				    SEQUENCE="false" PREVIOUS="flaxurl" NEXT="activitytype"/>
+				<FIELD NAME="activitytype" 
+					COMMENT="Possible values: ScrambleSentence, ContentWordGuessing, CollocationAlternatives, etc. 
+					The class names in flax/classes/ are named in the fasion flax_[activitytype]."
+					TYPE="char" LENGTH="255" NOTNULL="false" 
+					SEQUENCE="false" PREVIOUS="docid" NEXT="activitymode" />
+				<FIELD NAME="activitymode" NOTNULL="false" 
+					COMMENT="Exercise mode: i for individual; g for group; p for pair"
+					TYPE="char" LENGTH="2" SEQUENCE="false" DEFAULT="i" PREVIOUS="activitytype" NEXT="contentsummary" />
+				<FIELD NAME="contentsummary" 
+					TYPE="text" LENGTH="small" NOTNULL="false" 
+					SEQUENCE="false" PREVIOUS="activitymode" NEXT="maxgrade" />
+				<FIELD NAME="maxgrade" 
+					COMMENT="The maximum score for a flax exercise"
+					TYPE="int" LENGTH="5" NOTNULL="false" UNSIGNED="true" DEFAULT="0" 
+					SEQUENCE="false" PREVIOUS="contentsummary" NEXT="gradeover" />
+				<FIELD NAME="gradeover" 
+					COMMENT="The user's grade for a flax exercise is calculated as SUM(scores of submission table) / gradeover * maxgrade"
+					TYPE="int" LENGTH="5" NOTNULL="false" UNSIGNED="true" DEFAULT="1" 
+					SEQUENCE="false" PREVIOUS="maxgrade" NEXT="timeopen" />
+				<FIELD NAME="timeopen" 
+					TYPE="int" LENGTH="10" NOTNULL="false"
+					UNSIGNED="true" SEQUENCE="false" 
+					PREVIOUS="gradeover" NEXT="timeclose" />
+				<FIELD NAME="timeclose" 
+					TYPE="int" LENGTH="10" NOTNULL="false"	UNSIGNED="true" 
+					SEQUENCE="false" PREVIOUS="timeopen" NEXT="timecreated" />
+		        <FIELD NAME="timecreated" 
+		        	TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" 
+		        	DEFAULT="0" SEQUENCE="false" PREVIOUS="timeclose" NEXT="timemodified"/>
+		        <FIELD NAME="timemodified" 
+		        	TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" 
+		        	DEFAULT="0" SEQUENCE="false" PREVIOUS="timecreated" NEXT="intro"/>
+				<FIELD NAME="intro" 
+					COMMENT="General introduction of the flax exercise" TYPE="text"
+					LENGTH="small" NOTNULL="false" SEQUENCE="false" PREVIOUS="timemodified" NEXT="introformat" />
+				<FIELD NAME="introformat" 
+					TYPE="int" LENGTH="2" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" 
+					COMMENT="Format of the exercise introduction" PREVIOUS="intro" NEXT="info" />
+				<FIELD NAME="info"
+					COMMENT="Info about this course module instance. For example, ids of articles associated with this instance"
+					TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="introformat" />
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id" />
+			</KEYS>
+			<INDEXES>
+				<INDEX NAME="course" UNIQUE="false" FIELDS="course" />
+			</INDEXES>
+		</TABLE>
+
+		<TABLE NAME="flax_questions"
+			COMMENT=" This table is inited in function lib/flax_add_instance(). 
+			For activity types 'Word Guessing' and 'Predicting Words and Phrases', 
+			this table has one-one relationship with the table 'flax'; for Scrambled Sentences activity, one record of 'flax' is likely to associate with multiple records of 'flax_questions' table. This table has one-many relationship with 'flax_responses'."
+			PREVIOUS="flax" NEXT="flax_user_finish">
+			<FIELDS>
+				<FIELD NAME="id" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" SEQUENCE="true" NEXT="flaxid" />
+				<FIELD NAME="flaxid" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id"	NEXT="content" />
+				<FIELD NAME="content" 
+					TYPE="text" LENGTH="big"
+					NOTNULL="false" UNSIGNED="true" SEQUENCE="false" 					PREVIOUS="flaxid" NEXT="answer" />
+				<FIELD NAME="answer" 
+					TYPE="text" LENGTH="big" NOTNULL="false"
+					UNSIGNED="true" SEQUENCE="false" PREVIOUS="content" NEXT="paramkeys" />
+				<FIELD NAME="paramkeys"
+					COMMENT="Info about this question in terms of flax activity. For example, doc id, or sentence id, word position (ContentWordGuessing) etc"
+					TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="answer" NEXT="paramvalues" />
+				<FIELD NAME="paramvalues"
+					COMMENT="Info about this question in terms of flax activity. For example, doc id, or sentence id, word position (ContentWordGuessing) etc"
+					TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="paramkeys" />
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="flaxid" />
+				<KEY NAME="flaxid" TYPE="foreign" FIELDS="flaxid" REFTABLE="flax"
+					REFFIELDS="id" PREVIOUS="primary" />
+			</KEYS>
+		</TABLE>
+
+		<TABLE NAME="flax_user_finish" 
+			COMMENT="The main purpose of the table is to mark if a graded question is closed for a user.
+			For exercises that are not being graded, this table is not involved"
+			PREVIOUS="flax_questions" NEXT="flax_user_submissions">
+			<FIELDS>
+				<FIELD NAME="id" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" SEQUENCE="true" NEXT="flaxid" />
+				<FIELD NAME="flaxid" TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id"
+					NEXT="questionid" />
+				<FIELD NAME="questionid"
+					COMMENT="This is the primary key of a record of the 'flax_questions' table"
+					TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true"
+					SEQUENCE="false" PREVIOUS="flaxid" NEXT="userid" />
+				<FIELD NAME="userid" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="questionid"	NEXT="finished" />
+				<FIELD NAME="finished"
+					COMMENT="This field flags the question is no longer accessible.	Defaults to no; modified to yes by submit.php."
+					TYPE="char" LENGTH="5" NOTNULL="true" SEQUENCE="false" DEFAULT="no" PREVIOUS="userid" />
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="flaxid" />
+				<KEY NAME="flaxid" TYPE="foreign" FIELDS="flaxid" REFTABLE="flax" REFFIELDS="id" PREVIOUS="primary" NEXT="questionid" />
+				<KEY NAME="questionid" TYPE="foreign" FIELDS="questionid"
+					REFTABLE="flax_questions" REFFIELDS="id" PREVIOUS="flaxid" />
+			</KEYS>
+		</TABLE>
+
+		<TABLE NAME="flax_user_submissions" 
+			COMMENT="This table is for graded exercises only. Each time an answer on a question is sent back from flax server via submit.php, 
+			 a new record is inserted in the table. For graded exercises, there will be only one submission for a user on each question.
+			 A user's total score on a particular question is calculated by accumulating the score field of all relevent records." 
+			PREVIOUS="flax_user_finish" NEXT="flax_user_views">
+			<FIELDS>
+				<FIELD NAME="id" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" SEQUENCE="true" NEXT="flaxid" />
+				<FIELD NAME="flaxid" TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id"
+					NEXT="questionid" />
+				<FIELD NAME="questionid"
+					COMMENT="This is the primary key of a record of the 'flax_questions' table"
+					TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true"
+					SEQUENCE="false" PREVIOUS="flaxid" NEXT="userid" />
+				<FIELD NAME="userid" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="questionid"	NEXT="viewid" />
+				<FIELD NAME="viewid" 
+					TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true"
+					SEQUENCE="false" PREVIOUS="userid" NEXT="useranswer" />
+				<FIELD NAME="useranswer" 
+					TYPE="text" LENGTH="big" NOTNULL="false"
+					UNSIGNED="true" SEQUENCE="false" PREVIOUS="viewid" NEXT="score" />
+				<FIELD NAME="score" 
+					TYPE="int" LENGTH="6" NOTNULL="false" UNSIGNED="true" DEFAULT="0"
+					SEQUENCE="false" PREVIOUS="useranswer" NEXT="accesstime"/>
+				<FIELD NAME="accesstime" 
+					TYPE="int" LENGTH="10" NOTNULL="false"
+					UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="score" NEXT="paramkeys" />
+				<FIELD NAME="paramkeys"
+					COMMENT="Info about this question in terms of flax activity. For example, doc id, or sentence id, word position (ContentWordGuessing) etc"
+					TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="accesstime" NEXT="paramvalues" />
+				<FIELD NAME="paramvalues"
+					COMMENT="Info about this question in terms of flax activity. For example, doc id, or sentence id, word position (ContentWordGuessing) etc"
+					TYPE="text" LENGTH="medium" NOTNULL="false" SEQUENCE="false" PREVIOUS="paramkeys" />
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="flaxid" />
+				<KEY NAME="flaxid" TYPE="foreign" FIELDS="flaxid" REFTABLE="flax" REFFIELDS="id" PREVIOUS="primary" NEXT="questionid" />
+				<KEY NAME="questionid" TYPE="foreign" FIELDS="questionid"
+					REFTABLE="flax_questions" REFFIELDS="id" PREVIOUS="flaxid" NEXT="viewid" />
+				<KEY NAME="viewid" TYPE="foreign" FIELDS="viewid"
+					REFTABLE="flax_user_views" REFFIELDS="id" PREVIOUS="questionid" />
+			</KEYS>
+		</TABLE>
+
+		<TABLE NAME="flax_user_views"
+			COMMENT="Each access to view.php corresponds to a record of the table. 
+			This table has a relationship of 1 - * with table flax_user_submissions, 
+			i.e., there could be multiple submissions on different questions during each view."
+			PREVIOUS="flax_user_submissions">
+			<FIELDS>
+				<FIELD NAME="id" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" SEQUENCE="true" NEXT="flaxid" />
+				<FIELD NAME="flaxid" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id"
+					NEXT="userid" />
+				<FIELD NAME="userid" 
+					TYPE="int" LENGTH="10" NOTNULL="true"
+					UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="flaxid"
+					NEXT="submissionids" />
+				<FIELD NAME="submissionids" 
+					COMMENT="Ids of submission records occurred during each view"
+					TYPE="text" LENGTH="medium" NOTNULL="false"
+					UNSIGNED="true" SEQUENCE="false" PREVIOUS="userid" NEXT="score" />
+				<FIELD NAME="score" 
+					TYPE="int" LENGTH="6" NOTNULL="false" UNSIGNED="true" DEFAULT="0"
+					SEQUENCE="false" PREVIOUS="submissionids" NEXT="accesstime"/>
+				<FIELD NAME="accesstime" 
+					TYPE="int" LENGTH="10" NOTNULL="false"
+					UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="score" />
+			</FIELDS>
+			<KEYS>
+				<KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="flaxid" />
+				<KEY NAME="flaxid" TYPE="foreign" FIELDS="flaxid" REFTABLE="flax"
+					REFFIELDS="id" PREVIOUS="primary" />
+			</KEYS>
+		</TABLE>
+	</TABLES>
+</XMLDB>

@@ -1,0 +1,37 @@
+.mod-flax-form-add-content-btn-class {font-weight:bold;}
+.mod-flax-form-edit-content-btn-class {font-weight:normal;}
+.mod-flax-panel {
+	margin-bottom: 20px;
+	margin-left: 10px;
+	margin-right: 10px;
+}
+#flax_coll_list_container_id label, 
+#flax_activity_list_container_id label,
+#flax_document_list_container_id label {
+	margin-left: 5px;
+}
+span#new_coll_btn {
+	margin-top: 5px;
+	margin-left: 5px;
+	cursor:pointer;
+	text-decoration:underline;
+}
+.mod-flax-index-report-link-class {margin-top:0;margin-bottom:0;margin-left:1em;}
+.mod-flax-report-attempt-entry-class {/*lib/flax_print_recent_mod_activity*/
+	margin-left:20px;
+	border:none;}
+.mod-flax-noattempts-container-class{
+	margin-left:20px;}
+.mod_flax_indent_right {
+   margin-left: 17px;
+   }	
+/****** Styles for Scrambled Sentences ******/
+td.highlight-target-words span.scrambled_word {color:blue;}
+
+/****** Styles for Word Guessing ******/
+.current_attempt_words {color:blue;}
+.previous_attempt_words {color:#000000;}
+
+/****** Styles for Image Guessing **********/
+.image_guessing_submission_row tbody tr td {text-align: left;}
+.image_guessing_submission_row tbody tr td img {height: 40px; width: 30px;}
