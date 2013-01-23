@@ -56,7 +56,7 @@
     
     $params = array('viewid'=>$viewid, 'userid'=>$userid);
 	$sql = "SELECT
-	s.id, s.useranswer, s.score, s.userid, s.accesstime,
+	s.id, s.useranswer, s.score, s.userid, s.accesstime, s.paramkeys, s.paramvalues,
 	q.content, q.answer
 	FROM
 	{".SUBMISSION_TBL."} s
@@ -70,8 +70,8 @@
 	
 	$flax_activity_type = $flax->activitytype;
 	
-	$act_class_name = 'flax_'.$flax_activity_type;
-	require_once('classes/'.$act_class_name.'.class.php');
+	$act_class_name = flax_get_activity_class_name($flax->activitytype);
+	require_once('classes/'.flax_get_activity_class_filename($flax->activitytype));
 	$activity_instance = new $act_class_name($flax, $cm, $course);
 	$o = new stdClass();
 	$o->submissions = $submissions;

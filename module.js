@@ -49,7 +49,6 @@ M.mod_flax = {
 			place_holder_id: form_elem_id_arr[9]
 
 		};
-		
 		this.cfg.trans_modal_mask = 
 					new YAHOO.widget.Panel("_module_transparent_modal_mask_",  { 
 						width: "0", 
@@ -76,6 +75,7 @@ M.mod_flax = {
 				ACTIVITYANSWERS:'activityanswers',
 				ACTIVITYMODE:'activitymode',
 				ACTIVITYTYPE:'activitytype',
+				FLAXTYPE:'flaxtype',
 				CONTENTSUMMARY:'contentsummary',
 				GRADEOVER:'gradeover'
 		};
@@ -515,8 +515,8 @@ M.mod_flax.ActivityManager = {
 	show_view: function(cobj, activitytype_in_edit){
 		this.set_cobj_on_focus(cobj);
 		this.listbody.innerHTML = M.mod_flax.lib._get_icon_progress('Loading collection activities ...');
-		//This contains activity types configured for the collection "collname"
 		var html = '';
+		//This contains activity types configured for the collection "collname" (activity metadata and collocation_activity meta in collectionConfig.xml)
 		var act_arr = this.cobj_on_focus.act_arr;
 		if(act_arr && act_arr.length > 0) {			
 //			act_arr.sort();//sort by ascending alphabetically
@@ -598,10 +598,9 @@ M.mod_flax.ActivityManager = {
 	    o.wwwroot = this.cfg.flaxserver + '/greenstone3/';
 	    o.post_fn = 'saveExercise';
 	    var activity_design_obj = new LLDL.activities[script_name+'Module'](this.content_panel.body, o);
-	    activity_design_obj.isMoodle = true;//so that the 'Previous' button is not shown, and iframe height will be auto adjusted as well
+	    activity_design_obj.isMoodle = true;//so that the 'Previous question' button is not shown, and iframe height will be auto adjusted as well
 
 //		var save_exercise_fn = LLDL.activities[script_name+'Module'].prototype.saveExercise;
-
 		var this_obj = this;
 		activity_design_obj.saveExercise = function(){
 			//The execution context here is the instance of LLDL.activities[module_classname], 
@@ -610,7 +609,6 @@ M.mod_flax.ActivityManager = {
 //			this_obj._set_exercise_content(arguments[0]);
 			this_obj._set_exercise_content(o, collname);
 			this_obj.content_panel.hide();
-			
 			//Finish loading
 //			this_obj.cfg.loading_mask.hide();
 		};
@@ -645,9 +643,31 @@ M.mod_flax.ActivityManager = {
 	    		}
 	    	}
 	    }
-	    this._set_activitytype(this.select_activity);
-		
+	    this._set_activitytype(this.select_activity);		
 		yud.get(this.consts.GRADEOVER).value = param_o[this.consts.GRADEOVER];
+		yud.get('flaxtype').value = M.mod_flax.flaxtype;
+	},
+	//Hacky: function is called spcifically by activity classes
+	sortSentenceArray: function(sort_flag, arr2sort){
+		arr2sort.sort(function(a, b){
+	    	switch(sort_flag){
+		    	case '0':{//natural order in article
+		    		return a.natural_order - b.natural_order;
+		    	}
+		    	case '1':{//shortest first
+		    		return a.sen_len - b.sen_len;
+		    	}
+		    	case '2':{//longest first
+		    		return b.sen_len - a.sen_len;
+		    	}
+		    	case '3':{//random order
+		    		return a.random_order - b.random_order;
+		    	}
+		    	default:{//shouldn't come to this point
+		    		console.log('what is this: '+sort_flag);
+		    	}
+	    	}
+		});
 	},
 	//Hacky: function is called spcifically by activity classes
 	getDesignInterfaceButtons: function(btn_panel,cfg) {
@@ -728,7 +748,6 @@ M.mod_flax.DocumentManager = {
 	
 	init: function(cfg){
 		this.cfg = cfg;
-		console.log(this.cfg.document_list_body_id);
 		this.listbody = yud.get(this.cfg.document_list_body_id);
 	},
 	set_cobj_on_focus: function(cobj){

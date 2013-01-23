@@ -3,6 +3,29 @@
  * 
  * All classes in this files are utilized in module.js
  * 
+ * To implement a standalone activity type in the Moodle module:
+ *   1. In <activity_name>.js, implement LLDL.activities.<activity_name>Module function.  
+ *   2. Implement LLDL.activities.Design<activity_name>Module function in design_module.js
+ *   3. To achieve auto-save for module, the function call of designQuery in designInterfaceCallback in Design<activity_name>.js must be:
+ *   
+ *      this.designQuery(this.config_info.post_fn);
+ *      
+ *      where the value of post_fn ('saveExercise') is passed in from _load_exercise_content() in module.js
+ *      And, appropriate relay calls also need to be applied in designQueryCallback() as well (via 'post_fn')
+ *      
+ *   4. Implement classes/flax_activity_<activity name>.class.php
+ * 
+ * Generally, for an activity type to be configured for a particular collection in module,
+ * ie, for the exercise type to appear in the activity list of a collection when the module loads up in mod_form.php:
+ *   1. It must be implemented in the moodle module (as above)
+ *   2. It must be configured in the collectionConfig.xml of the collection (either as general activity or collocation ones)
+ *   3. A corresponding serviceRack element must be added in the buildConfig.xml of the collection
+ *   
+ * Little documentation on hooking up the module with the backend flax server:
+ *   When mod_form.php is invoked (register_site_id() call in the _construct), if the module hasn't registered itself with 
+ *   its configured flax server (checking is done thru $cfg object), it will make contact with the flax server which in turn
+ *   saves the module's info in a file called flaxAccess.txt on the server. The information will be later used by the flax
+ *   server to send back exercise information, for example grades, to the moodle server for report purposes. 
  */
 /**
  * 1. ScrambleSentence
@@ -351,4 +374,46 @@ LLDL.activities.DesignImageGuessingModule.prototype = {
 		o[this.info.caller_obj.consts.GRADEOVER] = ''+img_arr.length;
 		return o;
 	}
+};
+/**
+ * 8. Hangman
+ */
+LLDL.activities.DesignHangmanModule = function (root_el, info) {
+	var base_obj = new LLDL.activities.DesignHangman(root_el, info);
+	this.info = info;
+	this.base_obj = base_obj;
+	var m_obj = this;
+	base_obj.saveExercise =  function(){
+		var params_o = LLDL.activities.DesignHangman.prototype.saveExercise.call(base_obj);
+        m_obj.saveExercise(params_o);
+	};
+};
+LLDL.activities.DesignHangmanModule.prototype = {
+	saveExercise: function(params_o){
+		if(!params_o){
+			console.log('params_o is null');
+			return false;
+		}
+		if(!this.base_obj.complete_word_list || this.base_obj.complete_word_list.length ===0){
+			console.log('Empty exercise content');
+			return false;
+		}
+		var nodeanswers=[], nodecontents=[], nodeid_keys=[], nodeids = [];
+		for (var wo, i = 0; i < this.base_obj.complete_word_list.length; i++) {
+			wo = this.base_obj.complete_word_list[i];
+			if (wo.selected) {
+				nodeanswers[nodeanswers.length] = wo.word;
+				nodecontents[nodecontents.length] = this.base_obj.showhint? wo.hint_text : 'HINT_NOT_SET';
+			}
+		}
+
+        params_o[this.info.caller_obj.consts.PARAMKEYS] = 'showhint';
+        params_o[this.info.caller_obj.consts.PARAMVALUES] = this.base_obj.showhint;
+        params_o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = nodecontents.join(LLDL.text_separator);
+        params_o[this.info.caller_obj.consts.ACTIVITYANSWERS] = nodeanswers.join(LLDL.text_separator);
+        params_o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
+        params_o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Hangman exercise contains '+nodeanswers.length+' words';
+        params_o[this.info.caller_obj.consts.GRADEOVER] = ''+nodeanswers.length;
+		return params_o;		
+	}	
 };

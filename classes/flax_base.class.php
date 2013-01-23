@@ -395,7 +395,7 @@ const FLAX_GRADEMETHOD_ACUMULATIVE = 4;
     	return $obj;
     }
     /**
-     * This method should
+     * This method is invoked in submit.php
      * @param
      * @return ?
      */

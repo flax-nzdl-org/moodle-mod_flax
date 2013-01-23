@@ -96,7 +96,7 @@ if($flax_iframe_height && $flax_iframe_height != 0){
 	<script type="text/javascript">
 		var iframe = parent.parent.document.getElementById('<?php echo $iframeid; ?>');
 		iframe.height = ''+<?php echo $flax_iframe_height; ?>+'px';
-		console.log('in view.php: '+<?php echo $flax_iframe_height; ?>);
+		//console.log('in view.php: '+<?php echo $flax_iframe_height; ?>);
 	</script>
 <?php exit;	
 }
@@ -189,15 +189,15 @@ if(flax_is_type_exercise($flax)){
 	// Begin processing activity data (composing activity practice page in an iframe)
 	//
 		
-	$act_class_name = 'flax_'.$flax->activitytype;
-	$filename = 'classes/'.$act_class_name.'.class.php';
+	$act_class_name = flax_get_activity_class_name($flax->activitytype);
+	$filename = 'classes/'.flax_get_activity_class_filename($flax->activitytype);
 	if(!file_exists($filename)){
 		notice('unknown class name: '.$filename.'. Please report to system administrator');
 		exit;
 	}
 	require_once($filename);
 	$activity_instance = new $act_class_name($flax, $cm, $course, $context);
-	if (!in_array('flax_activity', class_implements($activity_instance))) {
+	if (!in_array('flax_interface', class_implements($activity_instance))) {
 		throw new coding_exception($act_class_name . ' does not implement flax_activity interface');
 	}
 	

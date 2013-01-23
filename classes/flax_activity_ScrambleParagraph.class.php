@@ -27,14 +27,14 @@ defined('MOODLE_INTERNAL') || die();
 require_once ($CFG->dirroot.'/mod/flax/locallib.php');
 require_once('classes/flax_base.class.php');
 require_once('classes/flax_base_group_a.class.php');
-require_once('classes/flax_activity.class.php');
+require_once('classes/flax_interface.class.php');
 
 /**
  * Activity class
  */
-class flax_MissingPunctuation extends flax_base_group_a implements flax_activity {
+class flax_activity_ScrambleParagraph extends flax_base_group_a implements flax_interface {
 	
-	protected $flax_type = 'MissingPunctuation';
+	protected $flax_type = 'ScrambleParagraph';
 	
 	/**
      * This method should 

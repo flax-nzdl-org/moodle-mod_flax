@@ -40,7 +40,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * flax_activity interface defines all methods that an individual activity has to implement
  */
-interface flax_activity {
+interface flax_interface {
 
     /**
      * Method to display the activity student view

@@ -95,6 +95,7 @@ $string['ImageGuessing'] = 'Image Guessing';
 $string['CollocationFillinBlanks'] = 'Complete Collocations';
 $string['CollocationAlternatives'] = 'Common Alternatives';
 $string['MultiChoices'] = 'Multiple Choices';
+$string['Hangman'] = 'Hangman';
 
 /*Exercise specific strings*/
 /***** ImageGuessing *****************/
@@ -111,4 +112,10 @@ $string['timeout'] = 'Game timed out';
 /***** Scrambled Paragraphs **********/
 $string['paraorder'] = 'Paragraph order';
 
+/***** Hangman ******************/
+$string['wordcompletion'] = 'Word completed';
+$string['wordhint'] = 'Hint of the word';
+$string['hintused'] = 'Hint used';
+$string['wrongletters'] = 'Letters you guessed incorrectly';
+$string['missedletters'] = 'Answer (letters missed out are shown in red)';
 ?>

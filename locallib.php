@@ -406,9 +406,9 @@ function flax_load_js_lib($courseid=null){
 				
 		), true
 	);
-    // load activity classes
+    // load activity classes which have been impletemented for the module
     $classes = flax_get_activity_classes();
-    foreach($classes as $class) {
+    foreach($classes as $class) {    	
     	$PAGE->requires->js(new moodle_url($flax_js_path.'resources/'.$class.'-interface-en.js?i='.$randnum));
     	$PAGE->requires->js(new moodle_url($flax_js_path.$class.'/Design'.$class.'.js?i='.$randnum));
     	$PAGE->requires->css(new moodle_url($flax_path.'style/Design'.$class.'.css'));
@@ -421,14 +421,33 @@ function flax_get_activity_classes() {
 	$classes_dir = dirname(__FILE__).'/classes';
 	$files_arr = scandir($classes_dir);
 	$act_names_arr = array();
-	$exclude_names = array('activity', 'base', 'fallback', 'sub_base_A', 'sub_base_B');
 	foreach ($files_arr as $fname){
-		if(!ends_with($fname, '.class.php')) continue;
-		$activity_name = substr(substr($fname, strlen('flax_')), 0, strlen('.class.php')*-1);
-		if(in_array($activity_name, $exclude_names)) continue;
+		if(!ends_with($fname, '.class.php') || !starts_with($fname, 'flax_activity_')) continue;
+		$activity_name = substr(substr($fname, strlen('flax_activity_')), 0, strlen('.class.php')*-1);
 		$act_names_arr[] = $activity_name;
 	}
 	return $act_names_arr;
+}
+/**
+ * Convert activity type to the class name implemented for the module, eg, ScrambleSentence to flax_activity_ScrambleSentence
+ * @param string $activitytype
+ */
+function flax_get_activity_js_object_name($classname){
+	return 'flax_activity_'.$activitytype;
+}
+/**
+ * Convert activity type to the class name implemented for the module, eg, ScrambleSentence to flax_activity_ScrambleSentence
+ * @param string $activitytype
+ */
+function flax_get_activity_class_name($activitytype){
+	return 'flax_activity_'.$activitytype;
+}
+/**
+ * Convert activity type to the file name of the class implemented for the module, eg, ScrambleSentence to flax_activity_ScrambleSentence.class.php
+ * @param string $activitytype
+ */
+function flax_get_activity_class_filename($activitytype){
+	return 'flax_activity_'.$activitytype.'.class.php';
 }
 function flax_icon_progress($txt){
 	global $OUTPUT;
@@ -676,7 +695,7 @@ function read_exercise_attempts_from_db($flaxid, $userid='', $sincetime=''){
     $userfields = user_picture::fields('u', null, 'userid');
 	$sql = "SELECT
 	a.id, a.flaxid, a.score, a.submissionids, a.accesstime,
-	f.name, f.activitytype, f.maxgrade, f.gradeover, f.intro, $userfields
+	f.name, f.flaxtype, f.activitytype, f.maxgrade, f.gradeover, f.intro, $userfields
 	FROM
 	{".VIEW_TBL."} a
 	JOIN {flax} f ON f.id = a.flaxid

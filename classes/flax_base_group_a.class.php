@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once ($CFG->dirroot.'/mod/flax/locallib.php');
 require_once('classes/flax_base.class.php');
-require_once('classes/flax_activity.class.php');
+require_once('classes/flax_interface.class.php');
 
 /**
  * Activity class
@@ -52,7 +52,6 @@ class flax_base_group_a extends flax_base {
     	$num_question_closed = 0;
     	$all_questions_finished = true;
     	$user_exercise_score = flax_read_user_score($flax, $USER->id);
-    	flax_debug_log('userscore='.$user_exercise_score);
     	
     	if(! $finish_records){
     		$all_questions_finished = false;
@@ -104,34 +103,40 @@ class flax_base_group_a extends flax_base {
      * @return ?
      */
     public function print_report(stdClass $flax, stdClass $obj){
+    	$table = $this->print_report_header($flax, $obj);
+    	$this->print_report_body($flax, $obj, $table);
+    }
+    public function print_report_header(stdClass $flax, stdClass $obj){
     	$score = 0;
     	if($obj->submissions){
     		foreach($obj->submissions as $sub){
     			$score = $score + intval($sub->score);
     		}
     	}
-    	$show_correct_answer = false;
-    	if($obj->permission_view_all || flax_exercise_open_close_check($flax)){
-    		$show_correct_answer = true;
-    	}
     	$table        = new html_table();
-//     	$table->attributes = array('align' => 'center');
+    	//     	$table->attributes = array('align' => 'center');
     	$table->head  = array (get_string('exercisename','flax'), get_string('exercisetype','flax'), get_string('totalscore','flax'));
     	$table->align = array ('left','left','left');
     	$table->data[] = array($flax->name, get_string($flax->activitytype, 'flax'), $score);
     	echo html_writer::table($table);
-    	
+    	return $table; 
+    }
+    public function print_report_body(stdClass $flax, stdClass $obj, $table){
     	if(!$obj->submissions){
     		global $OUTPUT;
     		echo $OUTPUT->box (get_string('nosubmission','flax'), 'generalbox boxwidthwide');
-    		
+    	
     	}else{
+    		$show_correct_answer = false;
+    		if($obj->permission_view_all || flax_exercise_open_close_check($flax)){
+    			$show_correct_answer = true;
+    		}
     		echo '<ol>';
     		foreach($obj->submissions as $sub){
     			$correct_answer = $show_correct_answer? $sub->answer:get_string('hiddenuntilclose','flax');
     			echo '<li>';
     			$table        = new html_table();
-//     			$table->attributes = array('');
+    			//     			$table->attributes = array('');
     			$table->colclasses = array(null, 'highlight-target-words');
     			$table->align = array ('left','left');
     			$table->data[] = array(get_string('question','flax'), $sub->content);
@@ -142,6 +147,6 @@ class flax_base_group_a extends flax_base {
     			echo '</li>';
     		}
     		echo '</ol>';
-    	}    	  	
+    	}
     }
 }

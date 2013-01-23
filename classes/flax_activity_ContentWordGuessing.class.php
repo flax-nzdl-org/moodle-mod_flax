@@ -26,12 +26,12 @@ defined('MOODLE_INTERNAL') || die();
 
 require_once ($CFG->dirroot.'/mod/flax/locallib.php');
 require_once('classes/flax_base.class.php');
-require_once('classes/flax_activity.class.php');
+require_once('classes/flax_interface.class.php');
 
 /**
  * Activity class
  */
-class flax_ContentWordGuessing extends flax_base implements flax_activity {
+class flax_activity_ContentWordGuessing extends flax_base implements flax_interface {
 	
 	protected $flax_type = 'ContentWordGuessing';
 

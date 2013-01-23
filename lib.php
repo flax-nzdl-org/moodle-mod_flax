@@ -55,7 +55,7 @@ function flax_add_instance($flax, $mform=null) {
 	$timenow = time();
 	$flax->timecreated = $timenow;
 	$flax->timemodified = $timenow;
-	
+// 	print_object($flax);return;
 	// Ready to insert to db and get the id
 	$dbid = $DB->insert_record('flax', $flax);
 	if(!$dbid){
@@ -411,6 +411,7 @@ function flax_get_recent_mod_activity(&$activities, &$index, $sincetime, $course
 		return;
 	}
 	foreach ($records as $record) {
+		// The properties contained in $record is determined by what was read from db in function read_exercise_attempts_from_db()
 // 		var_dump($record->userid);
 // 		var_dump($USER->id);
 		// own submissions always visible; or user has the capability to view all 
