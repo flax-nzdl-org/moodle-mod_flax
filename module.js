@@ -677,18 +677,23 @@ M.mod_flax.ActivityManager = {
 			images_url: this.cfg.flax_images_url
 		};
 		var external_btns = new HashMap();
+		var btnids = [];
 		if(cfg.preview) {
 			var preview_btn = LLDL.createButtonEl(lb.designactivity.preview_btn_id, LLDL.bundle.designactivity.preview_btn_label);
 			btn_panel.appendChild(preview_btn);
 			btn_panel.appendChild(LLDL.getHelpButtonEl(config_info, cfg.activityname+".preview", lang, LLDL.bundle.designactivity.preview_btn_label));
 			external_btns.put('preview', preview_btn);
+			btnids.push(lb.designactivity.preview_btn_id);
 		}
 		if(cfg.save) {
 		    var save_btn  = LLDL.createButtonEl(lb.designactivity.save_btn_id, LLDL.bundle.designactivity.save_and_exit_btn_label);
 		    btn_panel.appendChild(save_btn);
 		    btn_panel.appendChild(LLDL.getHelpButtonEl(config_info, "activity.save", lang, LLDL.bundle.designactivity.save_and_exit_btn_label));
 		    external_btns.put('save', save_btn);
+		    btnids.push(lb.designactivity.save_btn_id);
 		}
+
+		external_btns.btnids = btnids;
 		
 		var cancel_btn  = LLDL.createButtonEl('mod_flax_cancel_btn_id', 'Cancel');
 		btn_panel.appendChild(cancel_btn);
