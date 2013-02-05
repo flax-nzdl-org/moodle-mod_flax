@@ -18,8 +18,7 @@
  * Generally, for an activity type to be configured for a particular collection in module,
  * ie, for the exercise type to appear in the activity list of a collection when the module loads up in mod_form.php:
  *   1. It must be implemented in the moodle module (as above)
- *   2. It must be configured in the collectionConfig.xml of the collection (either as general activity or collocation ones)
- *   3. A corresponding serviceRack element must be added in the buildConfig.xml of the collection
+ *   2. A corresponding serviceRack element must be added in the buildConfig.xml of the collection, and configured true via message router
  *   
  * Little documentation on hooking up the module with the backend flax server:
  *   When mod_form.php is invoked (register_site_id() call in the _construct), if the module hasn't registered itself with 

@@ -94,6 +94,7 @@ define('MODULEPARAMS', 'moduleParams');
 
 define('DESIGN_INTERFACE', '14');
 define('LIST_COLL', '1009');
+define('MDL_LIST_COLL_ACTIVITIES', '1021');
 define('MODULE_SITE_REGISTER', '1010');
 
 define('FLAXTYPE_WRAP', 'flaxtype_wrap');
@@ -471,7 +472,7 @@ function register_site_id(){
 	$adminemail = $CFG->supportemail;
 	$param = 'a=pr&ro=1&rt=r&o=xml&s=MdlListCollections'.
 			'&s1.service='.MODULE_SITE_REGISTER.'&s1.mdlsiteid='.$mdlsiteid.'&s1.mdlsiteurl='.$mdlsiteurl.'&s1.callback='.$callback.'&s1.supportemail='.$CFG->supportemail;
-	$register_result = query_flax($param, 'string');
+	$register_result = query_flax($param);
 	if($register_result){
 		set_config(REGISTERED_FLAX_SERVER, $flax_domain.$flax_port, 'flax');
 	}
@@ -524,12 +525,7 @@ function query_flax($param, $format=null){
 		notice($msg);
 		die();
 	}
-	if($format && $format == 'xml'){
-		$xml = simplexml_load_string($content);
-		return $xml;
-	}else{
-		return $content;
-	}
+	return $content;
 }
 function upload_flax($url, $file_param){
 	global $CFG;
@@ -567,7 +563,24 @@ function flax_get_xml_response($ok){
 	return $xml_resp;
 }
 /**
- * Used by mod_form of both modules
+ * Called by module.js to query a list of activity types configured available for a collection
+ */
+function list_flax_collection_activities($collection_name){
+	global $USER;
+	$param = 'a=pr&ro=1&rt=r&o=xml&s=MdlListCollections'.
+			'&s1.service='.MDL_LIST_COLL_ACTIVITIES.
+			'&s1.collname='.$collection_name;
+	//$response is in the format: <response>activity_name,activity_name,activity_name</response>
+	$response_xml = query_flax($param);
+	preg_match('/<response>(.*)<\/response>/', $response_xml, $activities);
+	//$activities: ['whole_match','submatch1','submatch2']
+	if(sizeof($activities)<2){
+		return '';
+	}
+	return $activities[1];
+}
+/**
+ * Called in mod_form.php
  */
 function query_flax_collections(){
 	global $USER;
@@ -576,7 +589,7 @@ function query_flax_collections(){
 			'&s1.lang=en'.
 			'&s1.username='.$USER->username.
 			'&s1.mdlsiteid='.flax_get_mdl_site_id();
-	return query_flax($param, 'string');
+	return query_flax($param);
 }
 function flax_get_full_domain(){
 	return flax_get_server_url().'/greenstone3/flax';

@@ -39,6 +39,17 @@ if($display_proxy_iframe){
 */
 //Flag for relaying ajax requests between js-client (teacher's interface only - in module.js/M.mod_flax._query_flax() and backend flax server
 $flag = optional_param('ajax', '', PARAM_ALPHA);
+if($flag == 'listcollactivity'){
+	$collection_name = optional_param('c', '', PARAM_ALPHA);
+	if(!$collection_name){
+		flax_debug_log('in view.php, listcollactivity request missing c (collection name) parameter');
+		echo ''; exit;
+	}
+	//Comma separated string
+	$activity_list = list_flax_collection_activities($collection_name);
+	echo $activity_list;
+	exit;
+}else 
 if($flag == 'queryflax'){
 
 	$data = '';
@@ -57,7 +68,7 @@ if($flag == 'queryflax'){
 	// $site = optional_param('site', '', PARAM_RAW);
 	// $lang = optional_param('lang', '', PARAM_RAW);
 
-	$response = query_flax($data, 'string');
+	$response = query_flax($data);
 	// flax_debug_log('data='.$data);
 	// flax_debug_log('response='.$response);
 	echo $response;

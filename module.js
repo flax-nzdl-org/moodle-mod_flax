@@ -515,10 +515,28 @@ M.mod_flax.ActivityManager = {
 	show_view: function(cobj, activitytype_in_edit){
 		this.set_cobj_on_focus(cobj);
 		this.listbody.innerHTML = M.mod_flax.lib._get_icon_progress('Loading collection activities ...');
+		
+        var obj = {caller_obj: this,
+                callback_fn: function(activity_list){
+                	console.log(activity_list);
+                	var act_types = [];
+                	if(activity_list){
+                		act_types = activity_list.split(',');
+                	}
+                	this.show_view_callback(activitytype_in_edit, act_types);
+                },
+                c: cobj.name
+	     };
+	     M.mod_flax._list_flax_coll_activity(obj);
+	},
+	show_view_callback: function(activitytype_in_edit, activity_active_on_flax_server){
 		var html = '';
-		//This contains activity types configured for the collection "collname" (activity metadata and collocation_activity meta in collectionConfig.xml)
-		var act_arr = this.cobj_on_focus.act_arr;
-		if(act_arr && act_arr.length > 0) {			
+		//This contains activity types configured true by the message router for the collection "collname", 
+		//ie, 1. serviveRack added in buildConfig.xml 2. configure() method of corresponding activity class returned true
+		if(!activity_active_on_flax_server || activity_active_on_flax_server.length == 0) {
+			html = '<em>No activity was configured for the collection</em>';			
+		}else{
+			var act_arr = activity_active_on_flax_server;
 //			act_arr.sort();//sort by ascending alphabetically
 //			act_arr.reverse();//reverse to descending order
 			var default_act = activitytype_in_edit || act_arr[0];		
@@ -530,10 +548,9 @@ M.mod_flax.ActivityManager = {
 				act = this.activity_map.get(actname);
 				var checked = (actname == this.select_activity);
 				html += act.get_body_html(checked, i) + '<br/>';
-			}
-		} else {
-			html = '<em>No activity was configured for the collection</em>';
+			}			
 		}
+
 		this.listbody.innerHTML = html;
 
 		yue.on(this.listbody, 'click', function(evt){
@@ -717,6 +734,21 @@ M.mod_flax.ActivityManager = {
 	}
 	
 };
+M.mod_flax._list_flax_coll_activity = function(obj) {
+	var url = M.mod_flax.cfg.mdlsiteurl+'/mod/flax/view.php?ajax=listcollactivity&c='+obj.c;
+	yuc.initHeader("Cache-Control", "no-cache", true); 
+	yuc.initHeader("Expires", "-1", true); 
+	yuc.asyncRequest('POST', url, {
+		success:function(o){ 
+			// response type is string (see query_flax.php and locallib.php/query_flax)
+			obj.callback_fn.call(obj.caller_obj, o.responseText, obj.passover_obj);                                                    
+		},                 
+		failure:function(o){ 
+			obj.callback_fn.call(obj.caller_obj, obj.err_msg, false);
+			console.log(LLDL.getObjProperty(o));
+		}
+	}, null);    
+};
 M.mod_flax._query_flax = function(obj) {
 	var url = M.mod_flax.cfg.mdlsiteurl+'/mod/flax/view.php?ajax=queryflax';
 	var postdata = obj.postdata;
@@ -728,7 +760,7 @@ M.mod_flax._query_flax = function(obj) {
 			obj.callback_fn.call(obj.caller_obj, LLDL.string2xml(o.responseText), obj.passover_obj);                                                    
 		},                 
 		failure:function(o){ 
-
+			
 			obj.callback_fn.call(obj.caller_obj, obj.err_msg, false);
 			console.log(LLDL.getObjProperty(o));
 		}
