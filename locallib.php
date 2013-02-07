@@ -363,25 +363,29 @@ function flax_load_js_lib($courseid=null){
 	$PAGE->requires->js(new moodle_url($flax_path.'yui/utilities/utilities.js'));
 	$PAGE->requires->js(new moodle_url($flax_path.'yui/container/container-min.js'));
 	$PAGE->requires->js(new moodle_url($flax_path.'yui/button/button-min.js'));
+	$PAGE->requires->js(new moodle_url($flax_path.'yui/datasource/datasource.js'));
+	$PAGE->requires->js(new moodle_url($flax_path.'yui/autocomplete/autocomplete.js'));
+	$PAGE->requires->js(new moodle_url($flax_path.'yui/accordion/accordion.js'));
+	$PAGE->requires->js(new moodle_url($flax_path.'yui/yahoo-dom-event/yahoo-dom-event.js'));
 	$PAGE->requires->js(new moodle_url($flax_js_path.'resources/LLDL-interface-en.js'));
 	$PAGE->requires->js(new moodle_url($flax_js_path.'resources/designactivity-interface-en.js'));
 	$PAGE->requires->js(new moodle_url($flax_js_path.'core/LLDL.js?i='.$randnum));
-   $PAGE->requires->js(new moodle_url($flax_js_path.'core/utility.js?i='.$randnum));
-   $PAGE->requires->js(new moodle_url($flax_js_path.'core/BeanObjects.js?i='.$randnum));
-   
-   $PAGE->requires->js(new moodle_url($flax_js_path.'core/CollectionBuilder.js?i='.$randnum));
-	
-   $PAGE->requires->css(new moodle_url($flax_path.'style/flax-style.css'));
-   $PAGE->requires->css(new moodle_url($flax_path.'style/ListCollections.css'));
-   $PAGE->requires->css(new moodle_url($flax_path.'style/DesignInterface.css'));
-   $PAGE->requires->css(new moodle_url($flax_path.'style/BuildCollection.css'));
+	$PAGE->requires->js(new moodle_url($flax_js_path.'core/utility.js?i='.$randnum));
+	$PAGE->requires->js(new moodle_url($flax_js_path.'core/BeanObjects.js?i='.$randnum));
+	 
+	$PAGE->requires->js(new moodle_url($flax_js_path.'core/CollectionBuilder.js?i='.$randnum));
 
-    // Put styles.css after flax-style.css to override any conflicting rules between the two (not working?? find out later TODO)
+	$PAGE->requires->css(new moodle_url($flax_path.'style/flax-style.css'));
+	$PAGE->requires->css(new moodle_url($flax_path.'style/ListCollections.css'));
+	$PAGE->requires->css(new moodle_url($flax_path.'style/DesignInterface.css'));
+	$PAGE->requires->css(new moodle_url($flax_path.'style/BuildCollection.css'));
+
+	// Put styles.css after flax-style.css to override any conflicting rules between the two (not working?? find out later TODO)
 	$PAGE->requires->css('/mod/flax/styles.css');
 	$PAGE->requires->js('/mod/flax/module.js');//it has used some of the stuff in LLDL.js
 	$PAGE->requires->js('/mod/flax/design_module.js');
-	$PAGE->requires->js_init_call('M.mod_flax.config', 
-		array(  $CFG->wwwroot,
+	$PAGE->requires->js_init_call('M.mod_flax.config',
+			array(  $CFG->wwwroot,
 				get_string('modulename', 'flax'),
 				'dummy str',
 				flax_get_server_url(),
