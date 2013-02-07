@@ -131,14 +131,15 @@ M.mod_flax = {
 		
 		var place_holder_el = yud.get(this.cfg.place_holder_id);
 		var colls = place_holder_el.getElementsByTagName('collectionList')[0].getElementsByTagName('collection');
-		var all_activity_info = place_holder_el.getElementsByTagName('flaxActivityList')[0];
+		var all_activity_info_xml = place_holder_el.getElementsByTagName('flaxActivityList')[0];//from web/WEB-INF/classes/flax/en/activity.xml
 		var model_collection_config = place_holder_el.getElementsByTagName('collectionConfig')[0];
-
+		this.cfg.all_activity_map = new LLDL.Bean.FlaxActivityMap(all_activity_info_xml);
+		
 		this.collection_manager = M.mod_flax.CollectionManager;
 		this.activity_manager = M.mod_flax.ActivityManager;
 		this.document_manager = M.mod_flax.DocumentManager;
-		this.collection_manager.init(this.cfg, colls, model_collection_config, all_activity_info);		
-		this.activity_manager.init(this.cfg, this.consts, all_activity_info.getElementsByTagName('activity'));
+		this.collection_manager.init(this.cfg, colls, model_collection_config);		
+		this.activity_manager.init(this.cfg, this.consts);
 		this.document_manager.init(this.cfg);
 				
 		this.bind_chain_manager();
@@ -200,18 +201,16 @@ M.mod_flax.lib = {
 M.mod_flax.CollectionManager = {
 	cfg : null,
 	model_collection_config: null,
-	activity_xml: null,
 	clistbody: null,
 	//What to do following a collection is selected: either displaying its activity list or its article list
 	chain_manager: null,
 	coll_map: new HashMap(),
 
 	
-	init: function(cfg, colls, model_collection_config, activity_xml){
+	init: function(cfg, colls, model_collection_config){
 		this.cfg = cfg;
 		this.listbody = yud.get(this.cfg.coll_list_body_id);
 		this.cfg.model_collection_config = model_collection_config;
-		this.cfg.activity_xml = activity_xml;
 		this._init_buildcoll_panel();
 		for(var coll, i=0; i<colls.length; i++){
 			var flaxmeta = this._extract_flaxmeta(colls[i]);
@@ -256,7 +255,7 @@ M.mod_flax.CollectionManager = {
         		ajax_server_url: this.cfg.flax_ajax_url,
         		help_server_url: this.cfg.flax_ajax_url,
         		images_url:      this.cfg.flax_images_url,
-        		all_activity_map: new LLDL.Bean.FlaxActivityMap(this.cfg.activity_xml),
+        		all_activity_map: this.cfg.all_activity_map,
         		model_collection_config_xml : this.cfg.model_collection_config,
 	      		username: this.cfg.login_username,
 	      		mdlsiteid: this.cfg.mdlsiteid,
@@ -423,6 +422,7 @@ M.mod_flax.CollectionManager = {
 		if(this.coll_map.containsKey(default_collname) == false){
 			default_collname = 'password';
 		}
+		console.log(this.coll_map.keyArray);
 		this._set_current_collection(default_collname);//this.coll_map.keySet()[0]
 		this.append_coll(this.coll_map.get('password'));//put 'password' collection on top
 //		var html = '';
@@ -490,19 +490,19 @@ M.mod_flax.ActivityManager = {
 	cfg: null,
 	consts: null,
 	//This is like an activity database that contains info about all activity types
-	activity_map: new HashMap(),
+	act_map: new HashMap(),
 	
-	init: function(cfg, consts, activities){
+	init: function(cfg, consts){
 		this.cfg = cfg;
 		this.listbody = yud.get(this.cfg.activity_list_body_id);
 		this.consts = consts;
 		this._init_content_panel();
 
-		for (var i=0; i<activities.length; i++) {
-	    	var act_el = activities[i];
-	    	var act_name = act_el.getAttribute('name');
-			var act = new M.mod_flax._Activity(this.cfg, act_name, act_el);
-			this.activity_map.put(act_name, act);
+		for (var act, act_name, act_title, i=0; i<this.cfg.all_activity_map.valArray.length; i++) {
+	    	act_name = this.cfg.all_activity_map.valArray[i].name;
+	    	act_title = this.cfg.all_activity_map.valArray[i].title;
+			act = new M.mod_flax._Activity(this.cfg, act_name, act_title);
+			this.act_map.put(act_name, act);
 	    }
 	},
 	set_cobj_on_focus: function(cobj){
@@ -545,9 +545,9 @@ M.mod_flax.ActivityManager = {
 			for(var actname, act, i=0; i<act_arr.length; i++){
 				actname = act_arr[i];
 				if(this.cfg.aval_activity_arr.indexOf(actname) == -1) continue;
-				act = this.activity_map.get(actname);
+				act = this.act_map.get(actname);
 				var checked = (actname == this.select_activity);
-				html += act.get_body_html(checked, i) + '<br/>';
+				html += act.get_body_html(checked) + '<br/>';
 			}			
 		}
 
@@ -957,29 +957,17 @@ M.mod_flax._Collection.prototype = {
 		yud.get('cname_'+this.name).checked = selected;
 	}
 };
-M.mod_flax._Activity = function(cfg, act_name, act_el){
+M.mod_flax._Activity = function(cfg, act_name, act_title){
 	this.cfg = cfg;
 	this.name = act_name;
-	this.init(act_el);
+	this.title = act_title;
 };
 M.mod_flax._Activity.prototype = {
-	init: function(act_el){
-		this.title = LLDL.getDomFirstChildTextNodeValue(act_el, 'title');
-		var para_arr = act_el.getElementsByTagName('paragraph');
-		
-		var html = '';
-		if(para_arr && para_arr.length>0){
-			for(var i=0; i<para_arr.length; i++){
-				html += para_arr[i] + '<br/>';
-			}
-		}
-		this.description = html;
-	},
-	get_body_html: function(checked, idx){
-		var aname = this.cfg.activity_el_name;
-		var el_id = aname + '_'+this.name;
+	get_body_html: function(checked){
+		var const_aname = this.cfg.activity_el_name;
+		var el_id = const_aname + '_'+this.name;
 		var check_it = checked?'checked':'';
-		return '<input '+check_it+' type="radio" name="'+aname+'" value="'+this.name+'" id="'+el_id+'"/>'+
+		return '<input '+check_it+' type="radio" name="'+const_aname+'" value="'+this.name+'" id="'+el_id+'"/>'+
 		'<label for="'+el_id+'" title="">'+this.title + '</label>';
 	}
 };
