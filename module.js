@@ -535,13 +535,15 @@ M.mod_flax.ActivityManager = {
 		//ie, 1. serviveRack added in buildConfig.xml 2. configure() method of corresponding activity class returned true
 		if(!activity_active_on_flax_server || activity_active_on_flax_server.length == 0) {
 			html = '<em>No activity was configured for the collection</em>';			
+			this._set_current_activity(null);
+			this._load_exercise_content(this.cobj_on_focus.name);
 		}else{
 			var act_arr = activity_active_on_flax_server;
 //			act_arr.sort();//sort by ascending alphabetically
 //			act_arr.reverse();//reverse to descending order
 			var default_act = activitytype_in_edit || act_arr[0];		
 			this._set_current_activity(default_act);
-			this._load_exercise_content(this.cobj_on_focus.name);
+			this._load_exercise_content(null);
 			for(var actname, act, i=0; i<act_arr.length; i++){
 				actname = act_arr[i];
 				if(this.cfg.aval_activity_arr.indexOf(actname) == -1) continue;
@@ -589,11 +591,15 @@ M.mod_flax.ActivityManager = {
 //			this.content_panel.clean();
 //			return;
 //		}
-		// show loading indicators
-		this._set_content_summary(M.mod_flax.lib._get_icon_progress('Loading exercise content'), false);
-		this.cfg.trans_modal_mask.show();
-
 		this.content_panel.clean();
+		if(collname){
+			// show loading indicators
+			this._set_content_summary(M.mod_flax.lib._get_icon_progress('Loading exercise content'), false);
+			this.cfg.trans_modal_mask.show();			
+		}else{
+			this._set_content_summary('N/A', false);
+			return;
+		}
 
         var script_name = 'Design' + this.select_activity;
 
