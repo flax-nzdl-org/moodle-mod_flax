@@ -536,7 +536,7 @@ M.mod_flax.ActivityManager = {
 		if(!activity_active_on_flax_server || activity_active_on_flax_server.length == 0) {
 			html = '<em>No activity was configured for the collection</em>';			
 			this._set_current_activity(null);
-			this._load_exercise_content(this.cobj_on_focus.name);
+			this._load_exercise_content(null);
 		}else{
 			var act_arr = activity_active_on_flax_server;
 //			act_arr.sort();//sort by ascending alphabetically
