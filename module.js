@@ -219,7 +219,7 @@ M.mod_flax.CollectionManager = {
 					|| flaxmeta.category == LLDL.bundle.BuildCollection.c2//'public'
 					){
 				var flaxbean = new LLDL.Bean.FlaxCollection(this.cfg, flaxmeta);
-				if(!flaxbean.doc_map || flaxbean.doc_map.size()<=0){
+				if(!flaxbean || !flaxbean.doc_map || flaxbean.doc_map.size()<=0){
 					console.log('invalid coll: '+flaxbean.meta.title);
 					continue;//invalid collection
 				}
