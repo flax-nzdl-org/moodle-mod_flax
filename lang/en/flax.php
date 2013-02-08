@@ -39,6 +39,7 @@ $string['exercisemode'] = 'Exercise mode';
 $string['exercisemodeg'] = 'Group';
 $string['exercisemodei'] = 'Individual';
 $string['exercisemodep'] = 'Pair';
+$string['exercisename'] = 'Exercise name';
 $string['exercisetype'] = 'FLAX exercise type';
 
 //The following strings are used for setting user role permissions
