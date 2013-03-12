@@ -40,7 +40,7 @@ if($display_proxy_iframe){
 //Flag for relaying ajax requests between js-client (teacher's interface only - in module.js/M.mod_flax._query_flax() and backend flax server
 $flag = optional_param('ajax', '', PARAM_ALPHA);
 if($flag == 'listcollactivity'){
-	$collection_name = optional_param('c', '', PARAM_ALPHA);
+	$collection_name = optional_param('c', '', PARAM_ALPHANUM);
 	if(!$collection_name){
 		flax_debug_log('in view.php, listcollactivity request missing c (collection name) parameter');
 		echo ''; exit;
