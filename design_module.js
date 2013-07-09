@@ -416,3 +416,206 @@ LLDL.activities.DesignHangmanModule.prototype = {
 		return params_o;		
 	}	
 };
+/**
+ * 9. CollocationMatching
+ */
+LLDL.activities.DesignCollocationMatchingModule = function (root_el, info) {
+	this.info = info;
+	var mdl_obj = this;
+	var base_obj = new LLDL.activities.DesignCollocationMatching(root_el, info);
+	this.base_obj = base_obj;
+	base_obj.saveExercise = function(){
+		var o = LLDL.activities.DesignCollocationMatching.prototype.saveExercise.call(base_obj);
+		mdl_obj.saveExercise(o);
+	}
+};
+LLDL.activities.DesignCollocationMatchingModule.prototype = {
+	saveExercise : function(o){ 
+		var wordArray = [];
+		for (var i=0; i<this.base_obj.question_map.length; i++){
+			wordArray.push(this.base_obj.question_map[i])
+		}
+		var colloCount = 0;
+		for (var i=0; i<wordArray.length; i++){
+			var splitArray = wordArray[i].getCheckedCollocations().split('|');
+			colloCount += splitArray.length - 1;		// last element of array is blank (only need to count the ids)
+		}
+		
+		var totalQuestions = this.base_obj.quest_len;
+		
+		// the two save buttons at the button of the modedit page
+		var submit1 = yud.get("id_submitbutton");
+		var submit2 = yud.get("id_submitbutton2");
+		
+		// make the sentence syntactically correct (adds plural if there are more than one question)
+		var qText = 'question';
+		if (totalQuestions > 1) qText += 's';
+		var unusedText = '';
+		if (this.base_obj.unusedNum > 0){
+			unusedText += ' [' + this.base_obj.unusedNum + ' unused]';
+		}
+		
+		// If there are no questions set, inform the user to edit the exercise and disabled the save buttons
+		if (totalQuestions == 0){
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This exercise requires editing before it can be displayed';
+			submit1.disabled = true;
+			submit2.disabled = true;
+		}else{
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Collocation Matching exercise contains '+ totalQuestions + ' ' 
+				+ qText + '. (' + colloCount + ' collocations selected' + unusedText + ')';
+			submit1.disabled = false;
+			submit2.disabled = false;
+		}
+		
+		this.base_obj.previewExercise();
+		
+        o[this.info.caller_obj.consts.PARAMKEYS] = 'ids';
+        o[this.info.caller_obj.consts.PARAMVALUES] = o.activity_params;
+		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = 'N/A';
+		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = 'N/A';
+		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
+		o[this.info.caller_obj.consts.GRADEOVER] = ''+totalQuestions;
+		return o; 
+	}	
+};
+/**
+ * 10. RelatedWords
+ */
+LLDL.activities.DesignRelatedWordsModule = function (root_el, info) {
+	this.info = info;
+	var mdl_obj = this;
+	var base_obj = new LLDL.activities.DesignRelatedWords(root_el, info);
+	this.base_obj = base_obj;
+	base_obj.saveExercise = function(){
+		var o = LLDL.activities.DesignRelatedWords.prototype.saveExercise.call(base_obj);
+		mdl_obj.saveExercise(o);
+	}
+};
+LLDL.activities.DesignRelatedWordsModule.prototype = {
+	saveExercise : function(o){ 
+		var wordArray = [];
+		for (var i=0; i<this.base_obj.question_map.length; i++){
+			wordArray.push(this.base_obj.question_map[i])
+		}
+		var colloCount = 0;
+		for (var i=0; i<wordArray.length; i++){
+			var splitArray = wordArray[i].getCheckedCollocations().split('|');
+			colloCount += splitArray.length - 1;		// last element of array is blank (only need to count the ids)
+		}
+
+		// the two save buttons at the button of the modedit page
+		var submit1 = yud.get("id_submitbutton");
+		var submit2 = yud.get("id_submitbutton2");
+		
+		// If there are no questions set, inform the user to edit the exercise and disabled the save buttons
+		if (colloCount < 2){
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This exercise requires editing before it can be displayed';
+			submit1.disabled = true;
+			submit2.disabled = true;
+		}else{
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Related Words exercise contains ' + colloCount + ' collocations';
+			submit1.disabled = false;
+			submit2.disabled = false;
+		}
+		
+		this.base_obj.previewExercise();
+		
+        o[this.info.caller_obj.consts.PARAMKEYS] = 'ids';
+        o[this.info.caller_obj.consts.PARAMVALUES] = o.activity_params;
+		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = 'N/A';
+		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = 'N/A';
+		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
+		o[this.info.caller_obj.consts.GRADEOVER] = 1;
+		return o; 
+	}	
+};
+/**
+ * 11. CollocationDominoes
+ */
+LLDL.activities.DesignCollocationDominoesModule = function (root_el, info) {
+	this.info = info;
+	var mdl_obj = this;
+	var base_obj = new LLDL.activities.DesignCollocationDominoes(root_el, info);
+	this.base_obj = base_obj;
+	base_obj.saveExercise = function(){
+		var o = LLDL.activities.DesignCollocationDominoes.prototype.saveExercise.call(base_obj);
+		mdl_obj.saveExercise(o);
+	}
+};
+LLDL.activities.DesignCollocationDominoesModule.prototype = {
+	saveExercise : function(o){ 
+		
+		// -1 as globalColloCount includes the 'half' collocation that is still being created
+		var colloCount = this.base_obj.globalColloCount -1;
+		
+		// the two save buttons at the button of the modedit page
+		var submit1 = yud.get("id_submitbutton");
+		var submit2 = yud.get("id_submitbutton2");
+		
+		// If there are no questions set, inform the user to edit the exercise and disabled the save buttons
+		if (colloCount < 2){
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This exercise requires editing before it can be displayed';
+			submit1.disabled = true;
+			submit2.disabled = true;
+		}else{
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Collocation Dominoes exercise contains ' + colloCount + ' dominoes';
+			submit1.disabled = false;
+			submit2.disabled = false;
+		}	
+		
+        o[this.info.caller_obj.consts.PARAMKEYS] = 'ids';
+        o[this.info.caller_obj.consts.PARAMVALUES] = o.activity_params;
+		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = 'N/A';
+		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = 'N/A';
+		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
+		o[this.info.caller_obj.consts.GRADEOVER] = 1;
+		return o; 
+	}	
+};
+/**
+ * 12. CollocationGuessing
+ */
+LLDL.activities.DesignCollocationGuessingModule = function (root_el, info) {
+	this.info = info;
+	var mdl_obj = this;
+	var base_obj = new LLDL.activities.DesignCollocationGuessing(root_el, info);
+	this.base_obj = base_obj;
+	base_obj.saveExercise = function(){
+		var o = LLDL.activities.DesignCollocationGuessing.prototype.saveExercise.call(base_obj);
+		mdl_obj.saveExercise(o);
+	}
+};
+LLDL.activities.DesignCollocationGuessingModule.prototype = {
+	saveExercise : function(o){ 
+		var totalQuestions = this.base_obj.quest_len;
+		
+		// the two save buttons at the button of the modedit page
+		var submit1 = yud.get("id_submitbutton");
+		var submit2 = yud.get("id_submitbutton2");
+		
+		// make the sentence syntactically correct (adds plural if there are more than one question)
+		var qText = 'word';
+		if (totalQuestions > 1) qText += 's';
+		
+		// If there are no questions set, inform the user to edit the exercise and disabled the save buttons
+		if (totalQuestions < 1){
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This exercise requires editing before it can be displayed';
+			submit1.disabled = true;
+			submit2.disabled = true;
+		}else{
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Collocation Guessing exercise contains '+ totalQuestions + ' ' + qText + ' to guess';
+			submit1.disabled = false;
+			submit2.disabled = false;
+		}
+		
+		this.base_obj.previewExercise();
+		
+        o[this.info.caller_obj.consts.PARAMKEYS] = 'ids';
+        o[this.info.caller_obj.consts.PARAMVALUES] = o.activity_params;
+		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = 'N/A';
+		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = 'N/A';
+		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
+		o[this.info.caller_obj.consts.GRADEOVER] = 1;
+		return o; 
+	}	
+};

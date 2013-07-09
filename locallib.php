@@ -471,6 +471,9 @@ function register_site_id(){
 	}
 	global $CFG, $USER;
 	$mdlsiteid=flax_get_mdl_site_id();
+	
+	flax_debug_log($mdlsiteid);
+	
 	$mdlsiteurl = $CFG->wwwroot;
 	$callback = '/mod/flax/submit.php';
 	$adminemail = $CFG->supportemail;

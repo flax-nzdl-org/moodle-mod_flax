@@ -392,7 +392,7 @@ function flax_get_recent_mod_activity(&$activities, &$index, $sincetime, $course
         $course = $DB->get_record('course', array('id'=>$courseid));
     }
 
-    $modinfo =& get_fast_modinfo($course);
+    $modinfo = get_fast_modinfo($course);
 
     $cm = $modinfo->get_cm($cmid);
 	
@@ -416,7 +416,7 @@ function flax_get_recent_mod_activity(&$activities, &$index, $sincetime, $course
 // 		var_dump($USER->id);
 		// own submissions always visible; or user has the capability to view all 
 		if ($record->userid === $USER->id || $viewallreport ) {
-					
+		
 			$activity = new stdClass();
 			$activity->type = "flax";
 			$activity->flaxtype = $record->flaxtype;
@@ -431,7 +431,7 @@ function flax_get_recent_mod_activity(&$activities, &$index, $sincetime, $course
 			$activity->viewid = $record->id;
 			$activity->score = $record->score;
 			$activity->submissionids = $record->submissionids;
-			
+			$activity->user = new stdClass();
 			$activity->user->id = $record->userid;
 			$activity->user->picture = $record->picture;
 			$activity->user->firstname = $record->firstname;
@@ -440,7 +440,6 @@ function flax_get_recent_mod_activity(&$activities, &$index, $sincetime, $course
 			$activity->user->imagealt = $record->imagealt;
 			$activity->user->email = $record->email;
 				
-
 			$activities[$index++] = $activity;
 
 			unset($activity);
@@ -496,6 +495,7 @@ function flax_print_recent_mod_activity($activity, $courseid, $detail=false, $mo
 
     $cell4 = new html_table_cell();
     $cell4->text = userdate($activity->timestamp);
+	$score = new stdClass();
     $score->attributes = array('class'=>'');
     $row->cells[] = $cell4;
      

@@ -290,6 +290,7 @@ const FLAX_GRADEMETHOD_ACUMULATIVE = 4;
     	
     }
     protected function display_exercise_finished(){
+		global $OUTPUT;
       	echo $OUTPUT->notification('<h3 style="text-align:center;">'.get_string('exercisefinished', 'flax').'</h3>', 'notifysuccess');
     }
     protected function view_ungraded_exercise($flax){
@@ -402,6 +403,7 @@ const FLAX_GRADEMETHOD_ACUMULATIVE = 4;
     public function process_submission($flax, $record, $view, $score/*either 1 or 0*/, $responseconent){
     	global $DB, $CFG;
     	
+		error_log('another test');
     	$score = clean_param($score, PARAM_INT);
     	$record->finished = YES;
     	if(!$DB->update_record(FINISH_TBL, $record)){

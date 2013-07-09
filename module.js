@@ -422,7 +422,6 @@ M.mod_flax.CollectionManager = {
 		if(this.coll_map.containsKey(default_collname) == false){
 			default_collname = 'password';
 		}
-		console.log(this.coll_map.keyArray);
 		this._set_current_collection(default_collname);//this.coll_map.keySet()[0]
 		this.append_coll(this.coll_map.get('password'));//put 'password' collection on top
 //		var html = '';
@@ -518,7 +517,6 @@ M.mod_flax.ActivityManager = {
 		
         var obj = {caller_obj: this,
                 callback_fn: function(activity_list){
-                	console.log(activity_list);
                 	var act_types = [];
                 	if(activity_list){
                 		act_types = activity_list.split(',');
@@ -543,7 +541,7 @@ M.mod_flax.ActivityManager = {
 //			act_arr.reverse();//reverse to descending order
 			var default_act = activitytype_in_edit || act_arr[0];		
 			this._set_current_activity(default_act);
-			this._load_exercise_content(null);
+			this._load_exercise_content(this.cobj_on_focus.name);
 			for(var actname, act, i=0; i<act_arr.length; i++){
 				actname = act_arr[i];
 				if(this.cfg.aval_activity_arr.indexOf(actname) == -1) continue;
@@ -623,13 +621,17 @@ M.mod_flax.ActivityManager = {
 	    var activity_design_obj = new LLDL.activities[script_name+'Module'](this.content_panel.body, o);
 	    activity_design_obj.isMoodle = true;//so that the 'Previous question' button is not shown, and iframe height will be auto adjusted as well
 
-//		var save_exercise_fn = LLDL.activities[script_name+'Module'].prototype.saveExercise;
 		var this_obj = this;
 		activity_design_obj.saveExercise = function(){
 			//The execution context here is the instance of LLDL.activities[module_classname], 
 			// hence the declaration of 'activity_design_obj' above
+			
+			/* If design interface of activity displays an alert regarding the user's choice, it may
+			 * set moodleNoReturn to true, which prevents the moodle interface returning to the main
+			 * FLAX activity page (i.e. won't actually save the exercise) */
+			if (activity_design_obj.base_obj && activity_design_obj.base_obj.moodleNoReturn){ return; }
+			
 			var o = LLDL.activities[script_name+'Module'].prototype.saveExercise.call(activity_design_obj, arguments[0]);
-//			this_obj._set_exercise_content(arguments[0]);
 			this_obj._set_exercise_content(o, collname);
 			this_obj.content_panel.hide();
 			//Finish loading
@@ -756,14 +758,21 @@ M.mod_flax._list_flax_coll_activity = function(obj) {
 	}, null);    
 };
 M.mod_flax._query_flax = function(obj) {
+	if (obj.moodle_loading){
+		var wait_panel = LLDL.getWaitPanel(obj.loading_img_url, window.document.body);
+		wait_panel.show();
+	}
 	var url = M.mod_flax.cfg.mdlsiteurl+'/mod/flax/view.php?ajax=queryflax';
 	var postdata = obj.postdata;
 	yuc.initHeader("Cache-Control", "no-cache", true); 
 	yuc.initHeader("Expires", "-1", true); 
 	yuc.asyncRequest('POST', url, {
 		success:function(o){ 
+			if (wait_panel){
+				wait_panel.hide();
+			}
 			// response type is string (see query_flax.php and locallib.php/query_flax)
-			obj.callback_fn.call(obj.caller_obj, LLDL.string2xml(o.responseText), obj.passover_obj);                                                    
+			obj.callback_fn.call(obj.caller_obj, LLDL.string2xml(o.responseText), obj.passover_obj);
 		},                 
 		failure:function(o){ 
 			
