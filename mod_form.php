@@ -20,7 +20,7 @@ class mod_flax_mod_form extends moodleform_mod {
     /**
      * Constructor
      */
-    public function __construct($current, $section, $cm, $course) {        
+    public function __construct($current, $section, $cm, $course) {
         register_site_id();
         flax_load_js_lib($course->id);
         $this->course = $course;
@@ -43,13 +43,12 @@ class mod_flax_mod_form extends moodleform_mod {
         }
         global $PAGE;
         $PAGE->requires->js_init_call('M.mod_flax.init_flax', array($flaxtype, $collection, $activitytype_or_docid), true);
-    }
+	}
 	function definition() {
 		
-        global $CFG, $USER, $PAGE, $COURSE, $DB;
-
-        $mform =& $this->_form;
-
+         global $CFG, $USER, $PAGE, $COURSE, $DB;
+         $mform =& $this->_form;
+ 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // The elements defined in the $mform must comply with what's been declared in the flax table in install.xml     //
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////	
@@ -82,7 +81,6 @@ class mod_flax_mod_form extends moodleform_mod {
         $mform->addElement('hidden', 'gradeover', 1, array('id'=>'gradeover'));
         $mform->addElement('hidden', 'intro', 'dummyintro');
         $mform->addElement('hidden', 'introformat', FORMAT_HTML);
-                
 //-----------------------------------------------------------------------------------------------
 		$mform->addElement('header', 'contentblock', get_string('contentheader','flax'));
 
@@ -166,7 +164,7 @@ class mod_flax_mod_form extends moodleform_mod {
 		$mform->addElement('static','', '', $html);
       
 //-----------------------------------------------------------------------------------------------
-      $mform->addElement('header', 'gradeshdr', get_string('grade', 'flax'));
+		$mform->addElement('header', 'gradeshdr', get_string('grade', 'flax'));
 //-----------------------------------------------------------------------------------------------        
 /**
       $options = array();
@@ -176,37 +174,31 @@ class mod_flax_mod_form extends moodleform_mod {
       $mform->setDefault(GRADED, YES);
       $mform->addHelpButton(GRADED, 'exercisemode', 'flax');
 */        
-//-----------------------------------------
-// Maximum grade the user could achieve for the exercise
-//-----------------------------------------
-	  $grade_config = flax_maxgrades_config();
-      $mform->addElement('select', MAX_GRADE, get_string('grade', 'flax'), $grade_config->maxgrades);
-      $mform->setDefault(MAX_GRADE, $grade_config->default);
-      //$mform->addHelpButton(MAX_GRADE, MAX_GRADE, 'flax');
-      $mform->disabledIf(MAX_GRADE, 'flaxtype', 'eq', $this->resource);
+		//-----------------------------------------
+		// Maximum grade the user could achieve for the exercise
+		//-----------------------------------------
+		$grade_config = flax_maxgrades_config();
+		$mform->addElement('select', MAX_GRADE, get_string('grade', 'flax'), $grade_config->maxgrades);
+		$mform->setDefault(MAX_GRADE, $grade_config->default);
+		$mform->disabledIf(MAX_GRADE, 'flaxtype', 'eq', $this->resource);
 
 //-----------------------------------------------------------------------------------------------
-      $mform->addElement('header', 'accesscontrolhdr', get_string('accesscontrol', 'lesson'));
+		$mform->addElement('header', 'accesscontrolhdr', get_string('accesscontrol', 'lesson'));
 //-----------------------------------------------------------------------------------------------
-// Open time
-      $mform->addElement('date_time_selector', 'timeopen', get_string('exerciseopen', 'flax'), array('optional'=>true));
-      $mform->addHelpButton('timeopen', 'exerciseopen', 'flax');
-// Close time
-      $mform->addElement('date_time_selector', 'timeclose', get_string('exerciseclose', 'flax'), array('optional'=>true));
-      $mform->addHelpButton('timeclose', 'exerciseclose', 'flax');
-
+		// Open time
+		$mform->addElement('date_time_selector', 'timeopen', get_string('exerciseopen', 'flax'), array('optional'=>true));
+		$mform->addHelpButton('timeopen', 'exerciseopen', 'flax');
+		// Close time
+		$mform->addElement('date_time_selector', 'timeclose', get_string('exerciseclose', 'flax'), array('optional'=>true));
+		$mform->addHelpButton('timeclose', 'exerciseclose', 'flax');
 //-----------------------------------------------------------------------------------------------
 //      Standard hidden fields and default action buttons
 //-----------------------------------------------------------------------------------------------
-      $mform->addElement('hidden', 'cmidnumber', '');
-      $mform->addElement('hidden', 'visible', '');
-	   $this->standard_hidden_coursemodule_elements();
-// 	    $this->standard_coursemodule_elements();
-      $this->add_action_buttons();
-
-//         $mform->disabledIf('submitbutton', 'cmidnumber');
-//         $mform->disabledIf('submitbutton2', 'cmidnumber');
-    }
+		$mform->addElement('hidden', 'cmidnumber', '');
+		$mform->addElement('hidden', 'visible', '');
+	    $this->standard_hidden_coursemodule_elements();
+	    $this->add_action_buttons();
+     }
 
     /**
      * A good function to override of the parent's if necessary

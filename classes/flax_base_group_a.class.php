@@ -18,7 +18,7 @@
 /**
  * @package    mod
  * @subpackage flax
- * @author alex.xf.yu@gmail.com
+ * @author alex.xf.yu@gmail.com & mjl61@waikato.ac.nz
  **/
 
 /** Make sure this isn't being directly accessed */
@@ -29,14 +29,12 @@ require_once('classes/flax_base.class.php');
 require_once('classes/flax_interface.class.php');
 
 /**
- * Activity class
+ * flax_base_group_a class - extends the flax_base class with group of general methods that can apply to any activity
  */
 class flax_base_group_a extends flax_base {
 	
 	/**
-     * This method should 
-     * @param
-     * @return ?
+     * When an activity is viewed (i.e. page loaded) by user
      */
     public function view($flax){
     	global $CFG, $COURSE, $USER, $DB;
@@ -46,7 +44,6 @@ class flax_base_group_a extends flax_base {
     		return parent::view_ungraded_exercise($flax);    		
     	}
    	
-//     	$num_question_closed = $DB->count_records(SUBMISSION_TBL, array('flaxid'=>$flax->id,  'userid'=>$USER->id));
     	$finish_records = $DB->get_records_select(FINISH_TBL, 'flaxid=? AND userid=?', array($flax->id, $USER->id));
     	$record_ids = array();
     	$num_question_closed = 0;
@@ -63,7 +60,7 @@ class flax_base_group_a extends flax_base {
     			$fid = create_finish_record($flax, $questionid, $USER->id);
     			$record_ids[] = $fid;
     		}
-    	} 	else {
+    	}else{
     		// This exercise instance has been attempted before    	    		
     		foreach($finish_records as $a){
     			if(flax_is_question_finished($a->finished)) {
@@ -72,39 +69,26 @@ class flax_base_group_a extends flax_base {
     				$all_questions_finished = false;
     			}
     			$record_ids[] = $a->id;
-    		}   
-    		 		
+    		}    		
     	} //End of else
-    	
 
     	if($all_questions_finished) {
     		// All questions in the instance have been attempted and closed (applying to grading mode exercises only)
     		parent::display_exercise_finished();
     		return false;
     	}
-//     	print_r($record_ids.' -- '.$num_question_closed);
-//     	debugging(implode(',', $record_ids));
+
     	$mdl_site_id = flax_get_mdl_site_id();
     	$activity_specific_params = array(NUMCLOSED=>$num_question_closed, COURSEID=>$COURSE->id, COURSEPAGEURL=>$CFG->wwwroot.'/course/view.php');
     	return parent::view_graded_exercise($flax, $view->id, $mdl_site_id, $user_exercise_score, 
     			implode(',', $record_ids), $activity_specific_params);
     }
     /**
-     * This method should 
-     * @param
-     * @return ?
-     */
-//     public function process_submission($flax, $record, $view, $score/*either 1 or 0; converted to int in attepmt.php*/, $responseconent){
-//     	parent::process_submission($flax, $record, $view, $score, $responseconent);
-//     }
-    /**
-     * This method 
-     * @param
-     * @return ?
+     * When a user wants to view a report for an activity (i.e. under Course -> General -> *Activityname* -> Report -> View report of particular attempt)
      */
     public function print_report(stdClass $flax, stdClass $obj){
-    	$table = $this->print_report_header($flax, $obj);
-    	$this->print_report_body($flax, $obj, $table);
+    	$this->print_report_header($flax, $obj);
+    	$this->print_report_body($flax, $obj);
     }
     public function print_report_header(stdClass $flax, stdClass $obj){
     	$score = 0;
@@ -113,15 +97,27 @@ class flax_base_group_a extends flax_base {
     			$score = $score + intval($sub->score);
     		}
     	}
-    	$table        = new html_table();
-    	//     	$table->attributes = array('align' => 'center');
+    	$table = new html_table();
     	$table->head  = array (get_string('exercisename','flax'), get_string('exercisetype','flax'), get_string('totalscore','flax'));
     	$table->align = array ('left','left','left');
     	$table->data[] = array($flax->name, get_string($flax->activitytype, 'flax'), $score);
-    	echo html_writer::table($table);
+		echo html_writer::table($table);
     	return $table; 
     }
-    public function print_report_body(stdClass $flax, stdClass $obj, $table){
+	/**
+	 * Alternative print_report_header method to include score/maxscore 
+	 */
+	public function print_report_header_with_percent(stdClass $flax, stdClass $obj, $score, $maxscore){
+    	$percent = ' (' . number_format((($score / $maxscore) * 100), 0) . '%)';
+
+		// Print report header
+		$headtable = new html_table();
+		$headtable -> head = array(get_string('exercisename', 'flax'), get_string('exercisetype', 'flax'), get_string('totalscore', 'flax'));
+		$headtable -> align = array('left', 'left', 'left');
+		$headtable -> data[] = array($flax -> name, get_string($flax -> activitytype, 'flax'), $score . '/' . $maxscore . $percent);
+		echo html_writer::table($headtable);
+    }
+    public function print_report_body(stdClass $flax, stdClass $obj){
     	if(!$obj->submissions){
     		global $OUTPUT;
     		echo $OUTPUT->box (get_string('nosubmission','flax'), 'generalbox boxwidthwide');
@@ -136,7 +132,6 @@ class flax_base_group_a extends flax_base {
     			$correct_answer = $show_correct_answer? $sub->answer:get_string('hiddenuntilclose','flax');
     			echo '<li>';
     			$table        = new html_table();
-    			//     			$table->attributes = array('');
     			$table->colclasses = array(null, 'highlight-target-words');
     			$table->align = array ('left','left');
     			$table->data[] = array(get_string('question','flax'), $sub->content);
@@ -149,4 +144,77 @@ class flax_base_group_a extends flax_base {
     		echo '</ol>';
     	}
     }
+	/* report_alt is used by a few activities as an alternative print_report format */
+	public function print_report_alt(stdClass $flax, stdClass $obj){
+		$this->print_report_header($flax, $obj);
+		$this->print_report_body_alt($flax, $obj);
+	}
+	public function print_report_body_alt(stdClass $flax, stdClass $obj){
+		if(!$obj->submissions){
+    		global $OUTPUT;
+    		echo $OUTPUT->box (get_string('nosubmission','flax'), 'generalbox boxwidthwide');
+			return false;
+    	}
+		echo '<ol>';
+		foreach($obj->submissions as $sub){
+			echo '<li>';
+			$table = new html_table();
+			$table->align = array('left','left');
+			$table->head = array(get_string('youranswer','flax'), get_string('correctanswer','flax'));
+			$table->data[] = array($sub->useranswer, $sub->answer);
+			$table->data[] = array('<strong>'.get_string('score','flax').'</strong>', $sub->score);
+			echo html_writer::table($table);
+			echo '</li>';
+		}
+		echo '</ol>';
+	}
+
+
+	/**
+	 * Function to parse and create the paramkeys + paramvalues attributes before creating the submission record
+	 * Used by activities that have multiple parameters stored in their $responsecontent
+	 * $useranskey is the key of the parameter in $responsecontent to be stored in the 'useranswer' attribute of the submission table
+	 */
+	public function create_submission_record_with_param($flax, $record, $view, $score, $responsecontent, $useranskey){
+	
+		global $DB, $CFG;
+		
+		$score = clean_param($score, PARAM_INT);
+		$record->finished = YES;
+		if (!$DB -> update_record(FINISH_TBL, $record)) {
+			error_log('failed to update finish table record');
+			return false;
+		}
+			
+		// ANS_SEPARATOR has a literal value of '\\' - to use in regex, must repeat twice (as regex treats the / as an escape)
+		$a = ANS_SEPARATOR.ANS_SEPARATOR;
+		$pattern = "/([^".$a."]+)".$a."([^".$a."]+)/";
+		preg_match_all($pattern, $responsecontent, $pairs);	// split the content string into two arrays (param values and param keys)
+		$com = array_combine($pairs[1], $pairs[2]);			// combine the two arrays into one associative array
+
+		$paramkeys = '';
+		$paramvalues = '';
+
+		// loop through the associative array and create the paramkeys + paramvalues strings
+		foreach ($pairs[1] as $p){
+			if ($p != $useranskey){		// skip if it's the useranswer parameter
+				$paramkeys .= $p;
+				$paramvalues .= $com[$p];
+				if ($p !== end($pairs[1])){
+					$paramkeys .= ARG_SEPARATOR;
+					$paramvalues .= ARG_SEPARATOR;
+				}
+			}
+		}
+		
+		$uans = $com[$useranskey];
+		
+		$sub_record = parent::create_submission_record($flax, $record->questionid, $view, $score, $uans, $paramkeys, $paramvalues);
+		parent::update_view_record($view, $sub_record->id, $score);
+
+		require_once ($CFG->dirroot.'/mod/flax/lib.php');
+		flax_update_grades($flax, $view->userid);
+		 	
+		return true;
+	}
 }

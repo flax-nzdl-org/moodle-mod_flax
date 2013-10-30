@@ -20,7 +20,7 @@ function flax_exit($courseid, $msg){
     $verificationkey = required_param(MDLSITEID, PARAM_ALPHANUM);
     $viewid  = required_param(VIEWID, PARAM_INT);
     $recordid  = required_param(RECORDID, PARAM_INT);
-
+	
     global $DB;
 	$id_checks = true;
 	
@@ -65,7 +65,7 @@ function flax_exit($courseid, $msg){
     		flax_exit($course->id, 'update exercise url OK');
     	}
     }
-    
+	
 	$act_class_name = flax_get_activity_class_name($flax->activitytype);
 	require_once('classes/'.flax_get_activity_class_filename($flax->activitytype));
     $activity_instance = new $act_class_name($flax, $cm, $course);
@@ -75,10 +75,8 @@ function flax_exit($courseid, $msg){
 
     $score  = optional_param(USERSCORE, 0, PARAM_INT);
     $responsecontent = optional_param(RESPONSECONTENT, '', PARAM_RAW);
-    
+	
     if(!$activity_instance->process_submission($flax, $record, $view, $score, $responsecontent)){
     	flax_exit($course->id, 'activity instance process_submission returned false');
-    }else{
-    	flax_exit($course->id, 'nicely done');
     }
 ?>

@@ -102,6 +102,7 @@ const ID_SEPARATOR = ',';//used in lib.php and view.php
 const TEXT_SEPARATOR = ':;:;:';//used in lib.php and view.php
 const NV_SEPARATOR = ';;';//used in ws_gateway.php
 const ARG_SEPARATOR = ']]';//used in ws_gateway.php
+const ANS_SEPARATOR = '\\\\';//used in some activity class.php files to separate multiple parameters in one $responsecontent string e.g. CollocationGuessing.class.php
 const PARAM_NV_SEPARATOR = ';';//used in view.php
 const PARAM_ARG_SEPARATOR = ']';//used in view.php
 const MODULE_PARAMS = 'moduleParams';//used in view.php
@@ -400,22 +401,20 @@ const FLAX_GRADEMETHOD_ACUMULATIVE = 4;
      * @param
      * @return ?
      */
-    public function process_submission($flax, $record, $view, $score/*either 1 or 0*/, $responseconent){
-    	global $DB, $CFG;
-    	
-		error_log('another test');
+    public function process_submission($flax, $record, $view, $score, $responseconent){
+		
+		global $DB, $CFG;
     	$score = clean_param($score, PARAM_INT);
     	$record->finished = YES;
     	if(!$DB->update_record(FINISH_TBL, $record)){
     		error_log('failed to update finish table record');
     	}
-
+		
     	$sub_record = $this->create_submission_record($flax, $record->questionid, $view, $score, $responseconent);
     	$this->update_view_record($view, $sub_record->id, $score);
-    	
+		
     	require_once ($CFG->dirroot.'/mod/flax/lib.php');
     	flax_update_grades($flax, $view->userid);
-    	    	
     	return true;
     }    
 }

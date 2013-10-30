@@ -30,34 +30,10 @@ require_once('classes/flax_base_group_a.class.php');
 require_once('classes/flax_interface.class.php');
 
 /**
- * Activity class
+ * Activity class for ScrambleParagraph - can define custom php methods that apply only to this specific activity
  */
 class flax_activity_ScrambleParagraph extends flax_base_group_a implements flax_interface {
 	
 	protected $flax_type = 'ScrambleParagraph';
-	
-	/**
-     * This method should 
-     * @param
-     * @return ?
-     */
-    public function view($flax){
-    	return parent::view($flax);
-    }
-    /**
-     * This method should 
-     * @param
-     * @return ?
-     */
-    public function process_submission($flax, $record, $view, $score/*either 1 or 0; converted to int in attepmt.php*/, $responseconent){
-    	parent::process_submission($flax, $record, $view, $score, $responseconent);
-    }
-    /**
-     * This method 
-     * @param
-     * @return ?
-     */
-    public function print_report(stdClass $flax, stdClass $obj){
-    	parent::print_report($flax, $obj);
-    }
+
 }

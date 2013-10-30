@@ -29,7 +29,7 @@ require_once('classes/flax_base.class.php');
 require_once('classes/flax_interface.class.php');
 
 /**
- * Activity class
+ * Activity class for ImageGuessing - can define custom php methods that apply only to this specific activity
  */
 class flax_activity_ImageGuessing extends flax_base implements flax_interface {
 	
@@ -44,8 +44,8 @@ class flax_activity_ImageGuessing extends flax_base implements flax_interface {
     	global $CFG, $COURSE, $DB, $USER;
     	$view = parent::create_view_record($flax);
 
-      if(! flax_is_graded($flax)){
-    		return parent::view_ungraded_exercise($flax);
+		if(! flax_is_graded($flax)){
+			return parent::view_ungraded_exercise($flax);
     	}
     	
     	$finish_record = $DB->get_record_select(FINISH_TBL, 'flaxid=? AND userid=?', array($flax->id, $USER->id), 'id,questionid,finished');
@@ -55,9 +55,8 @@ class flax_activity_ImageGuessing extends flax_base implements flax_interface {
     		$recordid = create_finish_record($flax, $questionid, $USER->id);
     	}else{
     		if(flax_is_question_finished($finish_record->finished)){
-    			parent::display_exercise_finished();
-    		   return false;
-
+				parent::display_exercise_finished();
+				return false;
     		}
     		
     		$questionid = $finish_record->questionid;
@@ -183,7 +182,6 @@ class flax_activity_ImageGuessing extends flax_base implements flax_interface {
     		
     		$i++;
     	}
-    	
     }
     private function get_img_html($src){
     	return '<img src="'.$src.'" height="40px" width="30px"/>';

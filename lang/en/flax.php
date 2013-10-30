@@ -88,35 +88,48 @@ $string['youranswer'] = 'Your answer';
 
 
 /*Exercise titles*/
-$string['ContentWordGuessing'] = 'Word Guessing';
-$string['PredictingWords'] = 'Predicting Words and Phrases';
-$string['ScrambleSentence'] = 'Scrambled Sentences';
-$string['ScrambleParagraph'] = 'Scrambled Paragraphs';
-$string['ImageGuessing'] = 'Image Guessing';
-$string['CollocationFillinBlanks'] = 'Complete Collocations';
 $string['CollocationAlternatives'] = 'Common Alternatives';
-$string['MultiChoices'] = 'Multiple Choices';
+$string['CollocationDominoes'] = 'Collocation Dominoes';
+$string['CollocationFillinBlanks'] = 'Complete Collocations';
+$string['CollocationGuessing'] = 'Collocation Guessing';
+$string['CollocationMatching'] = 'Collocation Matching';
+$string['ContentWordGuessing'] = 'Word Guessing';
 $string['Hangman'] = 'Hangman';
+$string['ImageGuessing'] = 'Image Guessing';
+$string['MultiChoices'] = 'Multiple Choices';
+$string['PredictingWords'] = 'Predicting Words and Phrases';
+$string['RelatedWords'] = 'Related Words';
+$string['ScrambleParagraph'] = 'Scrambled Paragraphs';
+$string['ScrambleSentence'] = 'Scrambled Sentences';
+$string['SplitSentences'] = 'Split Sentences';
+
 
 /*Exercise specific strings*/
-/***** ImageGuessing *****************/
-$string['imgpool'] = 'Image pool';
-$string['imgpool_help'] = 'Candidate images used in the exercise';
-// get_string('gameduration','flax')
-$string['guesser'] = 'Guesser';
-$string['describer'] = 'Describer';
-$string['guesserimg'] = 'Guesser chooses image';
-$string['game'] = 'Game {$a}';
-$string['gameduration'] = 'Game lasts';
-$string['timeout'] = 'Game timed out';
+/***** CollocationGuessing *****/
+$string['yourattempts'] = 'Your attempts';
 
-/***** Scrambled Paragraphs **********/
-$string['paraorder'] = 'Paragraph order';
+/***** Content Word Guessing *****/
+$string['tableheadinfo'] = 'Your answer to the question is shown below. <br>Hover over any incorrect words (red) to view the correct word';
 
-/***** Hangman ******************/
+/***** Hangman *****/
+$string['hintnotset'] = 'No hint was set';
+$string['hintused'] = 'Hint used';
+$string['missedletters'] = 'Answer (letters missed out are shown in red)';
 $string['wordcompletion'] = 'Word completed';
 $string['wordhint'] = 'Hint of the word';
-$string['hintused'] = 'Hint used';
 $string['wrongletters'] = 'Letters you guessed incorrectly';
-$string['missedletters'] = 'Answer (letters missed out are shown in red)';
+
+/***** ImageGuessing *****/
+$string['describer'] = 'Describer';
+$string['imgpool'] = 'Image pool';
+$string['imgpool_help'] = 'Candidate images used in the exercise';
+$string['game'] = 'Game {$a}';
+$string['gameduration'] = 'Game lasts';
+$string['guesser'] = 'Guesser';
+$string['guesserimg'] = 'Guesser chooses image';
+$string['timeout'] = 'Game timed out';
+
+/***** Scrambled Paragraphs *****/
+$string['paraorder'] = 'Paragraph order';
+
 ?>

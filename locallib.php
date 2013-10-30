@@ -82,6 +82,7 @@ define('ID_SEPARATOR', ',');//used in lib.php and view.php
 define('TEXT_SEPARATOR', ':;:;:');//used in lib.php and view.php
 define('NV_SEPARATOR', ';;');//used in ws_gateway.php
 define('ARG_SEPARATOR', ']]');//used in ws_gateway.php
+define('ANS_SEPARATOR', '\\\\');//used in some activity class.php files to separate multiple parameters in one $responsecontent
 
 //The followings are used in view.php and attempt.php
 define('PARAM_NV_SEPARATOR', ';');
@@ -181,8 +182,10 @@ function flax_read_user_score($flax, $userid) {
 function flax_read_user_grade($courseid, $flaxid, $userid){
 	global $CFG;
     require_once("$CFG->libdir/gradelib.php");
+	echo 'I am in flax_read_user_grade <br>';
 	// See gradelib.php for details of what's been returned from grade_get_grades()
 	$grades = reset(reset(grade_get_grades($courseid, 'mod', 'flax', $flaxid, $userid)));
+	print_r($grades);
 	if(! $grades || ! $grades->grades){
 		return '0';
 	}
@@ -470,6 +473,7 @@ function register_site_id(){
 		return;
 	}
 	global $CFG, $USER;
+	
 	$mdlsiteid=flax_get_mdl_site_id();
 	
 	flax_debug_log($mdlsiteid);

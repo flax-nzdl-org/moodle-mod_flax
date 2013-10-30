@@ -77,7 +77,8 @@ M.mod_flax = {
 				ACTIVITYTYPE:'activitytype',
 				FLAXTYPE:'flaxtype',
 				CONTENTSUMMARY:'contentsummary',
-				GRADEOVER:'gradeover'
+				GRADEOVER:'gradeover',
+				REQUIRES_EDITING: 'This exercise requires editing before it can be displayed'
 		};
 	},
 	init_mod_ref_el: function(){
@@ -322,7 +323,6 @@ M.mod_flax.CollectionManager = {
 	    
 	    this.append_coll(cobj);
 	    this._programmatic_click_a_collection(cobj);
-	    console.log(cobj);
 	},
 	_post_build_editcoll_handler: function(flaxbean){
 		this.dismiss_building_mask();
@@ -626,16 +626,16 @@ M.mod_flax.ActivityManager = {
 			//The execution context here is the instance of LLDL.activities[module_classname], 
 			// hence the declaration of 'activity_design_obj' above
 			
-			/* If design interface of activity displays an alert regarding the user's choice, it may
-			 * set moodleNoReturn to true, which prevents the moodle interface returning to the main
-			 * FLAX activity page (i.e. won't actually save the exercise) */
-			if (activity_design_obj.base_obj && activity_design_obj.base_obj.moodleNoReturn){ return; }
-			
+			/* In the design interface of an activity, a user may attempt to save an exercise with invalid
+			 * parameters. An alert is usually displayed to the user (specified in the design interface),
+			 * and if this is the case, saveExercise will return false. 
+			 * Hence if o is false, module should not reload the main modedit page (user can either cancel
+			 * or choose valid parameters)*/
 			var o = LLDL.activities[script_name+'Module'].prototype.saveExercise.call(activity_design_obj, arguments[0]);
-			this_obj._set_exercise_content(o, collname);
-			this_obj.content_panel.hide();
-			//Finish loading
-//			this_obj.cfg.loading_mask.hide();
+			if (o != false){
+				this_obj._set_exercise_content(o, collname);
+				this_obj.content_panel.hide();
+			}
 		};
 	},
 	_set_content_summary: function(summary, show_edit_btn){
@@ -644,10 +644,36 @@ M.mod_flax.ActivityManager = {
 		yud.get('edit_btn').disabled = show_edit_btn? false : true;		
 	},
 	_set_exercise_content: function(param_o, collname){
+		// the two save buttons at the button of the modedit page
+		var submit1 = yud.get("id_submitbutton");
+		var submit2 = yud.get("id_submitbutton2");
+		
+		// below conditionals will check that the two save buttons are disabled/enabled as necessary, depending on whether the content is valid/still needs editing etc
 		if(!param_o){
 			this._set_content_summary('Content not valid', false);
+			submit1.disabled = true;
+			submit2.disabled = true;
 			return;
 		}
+		if (param_o[this.consts.CONTENTSUMMARY] == this.consts.REQUIRES_EDITING){
+			submit1.disabled = true;
+			submit2.disabled = true;
+		}else{
+			submit1.disabled = false;
+			submit2.disabled = false;
+		}
+		
+		// only individual exercises can be graded
+		// therefore if activitymode is otherwise, disable the grade select element
+		var grade_button = yud.get("id_maxgrade");
+		if (param_o[this.consts.ACTIVITYMODE] != 'i'){
+			grade_button.disabled = true;
+			yud.setAttribute(grade_button, 'title', 'Only individual activities can be graded');
+		}else{
+			grade_button.disabled = false;
+			grade_button.removeAttribute('title');
+		}
+
 		this._set_content_summary(param_o[this.consts.CONTENTSUMMARY], true);//'Illustrative exercise content summary';
 		
 		var serving_activity_url_common_params =  
@@ -775,7 +801,6 @@ M.mod_flax._query_flax = function(obj) {
 			obj.callback_fn.call(obj.caller_obj, LLDL.string2xml(o.responseText), obj.passover_obj);
 		},                 
 		failure:function(o){ 
-			
 			obj.callback_fn.call(obj.caller_obj, obj.err_msg, false);
 			console.log(LLDL.getObjProperty(o));
 		}

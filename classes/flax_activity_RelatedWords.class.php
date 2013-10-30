@@ -18,7 +18,7 @@
 /**
  * @package    mod
  * @subpackage flax
- * @author xiao@waikato.ac.nz
+ * @author xiao@waikato.ac.nz & mjl61@waikato.ac.nz
  **/
 
 /** Make sure this isn't being directly accessed */
@@ -30,34 +30,31 @@ require_once('classes/flax_base_group_a.class.php');
 require_once('classes/flax_interface.class.php');
 
 /**
- * Activity class
+ * Activity class for RelatedWords - can define custom php methods that apply only to this specific activity
  */
 class flax_activity_RelatedWords extends flax_base_group_a implements flax_interface {
 	
 	protected $flax_type = 'RelatedWords';
-	
-	/**
-     * This method should 
-     * @param
-     * @return ?
-     */
-    public function view($flax){
-    	return parent::view($flax);
-    }
+
     /**
-     * This method should 
-     * @param
-     * @return ?
-     */
-    public function process_submission($flax, $record, $view, $score/*either 1 or 0; converted to int in attepmt.php*/, $responseconent){
-    	parent::process_submission($flax, $record, $view, $score, $responseconent);
-    }
-    /**
-     * This method 
-     * @param
-     * @return ?
+     * Custom print_report method
      */
     public function print_report(stdClass $flax, stdClass $obj){
-    	parent::print_report($flax, $obj);
+    	parent::print_report_header($flax, $obj);
+		
+		if(!$obj->submissions){
+    		global $OUTPUT;
+    		echo $OUTPUT->box (get_string('nosubmission','flax'), 'generalbox boxwidthwide');
+    	}else{
+    		echo '<ol>';
+    		foreach($obj->submissions as $sub){
+    			$table = new html_table();
+    			$table->align = array ('left','left');
+				$table->head = array (get_string('youranswer', 'flax'), get_string('correctanswer', 'flax'));
+    			$table->data[] = array($sub->useranswer, $sub->answer);
+    			echo html_writer::table($table);
+    		}
+    		echo '</ol>';
+    	}
     }
 }

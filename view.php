@@ -187,7 +187,6 @@ $PAGE->requires->css('/mod/flax/styles.css');
 // To control what is printed, you should set properties on $PAGE. (TODO)
 echo $OUTPUT->header();
 
-
 $flax->accesstime = $accesstime;
 // print_object($flax->accesstime);
 
@@ -199,7 +198,6 @@ if(flax_is_type_exercise($flax)){
 	//
 	// Begin processing activity data (composing activity practice page in an iframe)
 	//
-		
 	$act_class_name = flax_get_activity_class_name($flax->activitytype);
 	$filename = 'classes/'.flax_get_activity_class_filename($flax->activitytype);
 	if(!file_exists($filename)){
@@ -213,6 +211,7 @@ if(flax_is_type_exercise($flax)){
 	}
 	
 	$view_obj = $activity_instance->view($flax);
+		
 	$src = '';
 	if($view_obj){
 		$src = $view_obj->{FLAXURL}.'&mdlflax&s1.'.PARAMS.'='.$view_obj->{PARAMS}.'&s1.'.MODULEPARAMS.'='.$view_obj->{MODULEPARAMS};
@@ -227,7 +226,7 @@ if($src){
 	
 	<noscript>
 	<div id="noscript">
-	Javascript must be enalbed for FLAX activities to function properly.
+	Javascript must be enabled for FLAX activities to function properly.
 	</div>
 	</noscript>
 	<?php

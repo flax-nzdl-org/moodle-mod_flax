@@ -76,20 +76,16 @@ function flax_add_instance($flax, $mform=null) {
 	return $dbid;
 }
 function _flax_process_data($flax){
-//	$paramkeys = $flax->paramkeys;//implode(',', explode(TEXT_SEPARATOR, $flax->paramkeys));
-//	$paramvalues = $flax->paramvalues;//implode(',', explode(TEXT_SEPARATOR, $flax->paramvalues));
-//	$nodecontents = $flax->activitycontents;//implode(',', explode(TEXT_SEPARATOR, $flax->activitycontents));
-//	$nodeanswers = $flax->activityanswers;//implode(',', explode(TEXT_SEPARATOR, $flax->activityanswers));
 	$paramkeys = explode(TEXT_SEPARATOR, $flax->paramkeys);
 	$paramvalues = explode(TEXT_SEPARATOR, $flax->paramvalues);
 	$nodecontents = explode(TEXT_SEPARATOR, $flax->activitycontents);
 	$nodeanswers = explode(TEXT_SEPARATOR, $flax->activityanswers);
-	for($i = 0, $num_qns=count($nodecontents); $i<$num_qns; $i++) {
-		create_question_record($flax, $nodecontents[$i], 
-		                       ($nodeanswers[$i]?$nodeanswers[$i]:$flax->activityanswers), 
-		                       ($paramkeys[$i]?$paramkeys[$i]:$flax->paramkeys), 
-		                       ($paramvalues[$i]?$paramvalues[$i]:$flax->paramvalues)
-		                       );
+	for($i = 0; $i<max(count($nodecontents), count($nodeanswers)); $i++) {	
+		create_question_record($flax, 
+						(count($nodecontents)>$i ? $nodecontents[$i] : $flax->activitycontents), 
+						(count($nodeanswers)>$i ? $nodeanswers[$i] : $flax->activityanswers), 
+						(count($paramkeys)>$i ? $paramkeys[$i] : $flax->paramkeys),
+						(count($paramvalues)>$i ? $paramvalues[$i] : $flax->paramvalues));
 	}
 }
 /**
