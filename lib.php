@@ -55,6 +55,10 @@ function flax_add_instance($flax, $mform=null) {
 	$timenow = time();
 	$flax->timecreated = $timenow;
 	$flax->timemodified = $timenow;
+	// if exercise is selected not to be graded - set the maxgrade value to 0 -> this will now ensure that the exercise is considered non-graded
+	if ($flax->graded == 'no'){
+		$flax->maxgrade = 0;
+	}
 // 	print_object($flax);return;
 	// Ready to insert to db and get the id
 	$dbid = $DB->insert_record('flax', $flax);
@@ -266,12 +270,11 @@ function flax_grade_item_update(stdClass $flax, $grades = null) {
     global $CFG;
     require_once($CFG->libdir.'/gradelib.php');
 
-    $grade_cfg = flax_maxgrades_config();
     $params = array();
     $params['itemname'] = clean_param($flax->name, PARAM_NOTAGS);   	
     $params['gradetype'] = GRADE_TYPE_VALUE;
-    $params['grademax']  = $grade_cfg->grademax;
-    $params['grademin']  = $grade_cfg->grademin;
+    $params['grademax']  = $flax->maxgrade;			// grade specified by user in the modedit screen
+    $params['grademin']  = 0;
 
     $result = grade_update('mod/flax', $flax->course, 'mod', 'flax', $flax->id, 0, $grades, $params);
     return $result;

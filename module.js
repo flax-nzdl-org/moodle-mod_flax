@@ -26,7 +26,8 @@ M.mod_flax = {
 			courseid:courseid,
 			is_teacher:is_teacher,
 			aval_activity_arr:aval_activity_names.split(','),
-
+			db_name:'BNC',		// TODO: Configure better at another time? - Similar to activity.xsl; checks page response to see if any db - BNC if not
+			
 			content_panel_body_id:'_content_panel_body_id',
 			buildcoll_panel_body_id : '_buildcoll_panel_body_id',
 			coll_el_name: 'cname',
@@ -600,7 +601,6 @@ M.mod_flax.ActivityManager = {
 		}
 
         var script_name = 'Design' + this.select_activity;
-
 	    var o=LLDL.getDesignActivityConfigObject(  
 	    		/*1: ajax_server_url*/         null, 
 	            /*2: help_server_url*/         this.cfg.flax_ajax_url,
@@ -612,7 +612,8 @@ M.mod_flax.ActivityManager = {
 	            /*8: ajax_fn*/                 M.mod_flax._query_flax,//this._relay_flax_4_design_exercise, 
 	            /*9: coll_name*/               collname,
 	            /*10:is_teacher*/              this.cfg.is_teacher,
-	            /*11:lang*/                    'en'
+	            /*11:lang*/                    'en',
+	            /*12:dbname*/				   this.cfg.db_name
 	      );
 	//flax_server_url is particularly important to ImageGuessing activity in module when displaying all pool images 
 	// (unlike stand-alone version, it needs absolute url address)                                     
@@ -663,15 +664,17 @@ M.mod_flax.ActivityManager = {
 			submit2.disabled = false;
 		}
 		
-		// only individual exercises can be graded
-		// therefore if activitymode is otherwise, disable the grade select element
-		var grade_button = yud.get("id_maxgrade");
+		// only individual exercises can be graded - therefore if activitymode is otherwise, 
+		// disabled and change the exercise mode to non-graded (also ensure grade weighting is disabled)
+		var grade_mode = yud.get("id_graded");
 		if (param_o[this.consts.ACTIVITYMODE] != 'i'){
-			grade_button.disabled = true;
-			yud.setAttribute(grade_button, 'title', 'Only individual activities can be graded');
+			grade_mode.value = "no";
+			grade_mode.disabled = true;
+			yud.get("id_maxgrade").disabled = true;
+			yud.setAttribute(grade_mode, 'title', 'Only individual activities can be graded');
 		}else{
-			grade_button.disabled = false;
-			grade_button.removeAttribute('title');
+			grade_mode.disabled = false;
+			grade_mode.removeAttribute('title');
 		}
 
 		this._set_content_summary(param_o[this.consts.CONTENTSUMMARY], true);//'Illustrative exercise content summary';

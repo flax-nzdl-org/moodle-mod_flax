@@ -211,16 +211,12 @@ function flax_read_user_grade($courseid, $flaxid, $userid){
  */
 function flax_maxgrades_config() {
 	$grades = array();
-	$max = 100; $min = 1;
-	$grades[0] = get_string('gradeno','flax');
-	for ($i=$max; $i>0; $i--) {
+	for ($i=1; $i<=100; $i++) {
 		$grades[$i] = $i;
 	}
 	$cfg = new stdClass();
-	$cfg->default = 0;
+	$cfg->default = 10;
 	$cfg->maxgrades = $grades;
-	$cfg->grademax = $max;
-	$cfg->grademin = $min;
 	return $cfg;
 }
 /**

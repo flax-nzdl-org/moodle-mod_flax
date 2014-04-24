@@ -164,26 +164,35 @@ class mod_flax_mod_form extends moodleform_mod {
 		$mform->addElement('static','', '', $html);
       
 //-----------------------------------------------------------------------------------------------
-		$mform->addElement('header', 'gradeshdr', get_string('grade', 'flax'));
+		$mform->addElement('header', 'gradeshdr', get_string('grading', 'flax'));
+		$mform->setExpanded('gradeshdr');	// set header to expand by default
 //-----------------------------------------------------------------------------------------------        
-/**
-      $options = array();
-      $options[YES] = get_string("modegrade", "flax");
-      $options[NO] = get_string("modenograde", "flax");
-      $mform->addElement('select', GRADED, get_string('exercisemode', 'flax'), $options);
-      $mform->setDefault(GRADED, YES);
-      $mform->addHelpButton(GRADED, 'exercisemode', 'flax');
-*/        
-		//-----------------------------------------
-		// Maximum grade the user could achieve for the exercise
-		//-----------------------------------------
+
+		//----------------------------------------
+		// GRADE WEIGHTING
+		//
+		// User selects if exercise is to be graded.
+		// If so, they choose the grade weighting for this exercise.
+		// (e.g. The range of possible marks for this exercise; choosing 10 will result in a range of 0-10. 
+		//  Consequently scoring 3/5 in the exercise will result in a raw mark of 6.00 [on the scale of 0-10])
+		//----------------------------------------
+		$options = array();
+		$options[YES] = get_string("gradedexercise", "flax");
+		$options[NO] = get_string("notgradedexercise", "flax");
+		$mform->addElement('select', GRADED, get_string('exercisemode', 'flax'), $options);
+		$mform->setDefault(GRADED, NO);
+		$mform->addHelpButton(GRADED, 'exercisemode', 'flax');
+
 		$grade_config = flax_maxgrades_config();
-		$mform->addElement('select', MAX_GRADE, get_string('grade', 'flax'), $grade_config->maxgrades);
+		$attribute = 'disabled="disabled"';
+		$mform->addElement('select', MAX_GRADE, get_string('gradeweight', 'flax'), $grade_config->maxgrades, $attribute);
 		$mform->setDefault(MAX_GRADE, $grade_config->default);
-		$mform->disabledIf(MAX_GRADE, 'flaxtype', 'eq', $this->resource);
+		$mform->addHelpButton(MAX_GRADE, 'gradeweight', 'flax');
+		$mform->disabledIf(MAX_GRADE, GRADED, 'eq', NO);
 
 //-----------------------------------------------------------------------------------------------
 		$mform->addElement('header', 'accesscontrolhdr', get_string('accesscontrol', 'lesson'));
+		$mform->setExpanded('accesscontrolhdr');
 //-----------------------------------------------------------------------------------------------
 		// Open time
 		$mform->addElement('date_time_selector', 'timeopen', get_string('exerciseopen', 'flax'), array('optional'=>true));

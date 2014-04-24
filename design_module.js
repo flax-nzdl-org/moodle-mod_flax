@@ -1,5 +1,5 @@
 /**
- * @author alex.xf.yu@gmail.com & mjl61@waikato.ac.nz
+ * @author alex.xf.yu@gmail.com & mjl61@students.waikato.ac.nz
  * 
  * All classes in this files are utilized in module.js
  * 
@@ -93,6 +93,7 @@ LLDL.activities.DesignSplitSentencesModule = function (root_el, info) {
 };
 LLDL.activities.DesignSplitSentencesModule.prototype = {
 	saveExercise : function(o){
+		
 		var sentences = this.base_obj.sentence_map.valSet();
 		var questions = [];
 		var ql = this.base_obj.question_length;
@@ -101,14 +102,14 @@ LLDL.activities.DesignSplitSentencesModule.prototype = {
 		var sen = '';
 		
 		for (s=0; s<sentences.length; s++){
-			if (sen=sentences[s]){
-				qText += '<p>' + sen.raw + '</p>';
-				sIndex++;
-				if (sIndex == ql){
-					questions.push(qText);
-					qText = '';
-					sIndex = 0;
-				}
+			sen = sentences[s];
+			if (!sen.include) continue;
+			qText += '<p>' + sen.raw + '</p>';
+			sIndex++;
+			if (sIndex == ql){
+				questions.push(qText);
+				qText = '';
+				sIndex = 0;
 			}
 		}
 		
@@ -119,10 +120,11 @@ LLDL.activities.DesignSplitSentencesModule.prototype = {
 		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = 'N/A';
 		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = questions.join(LLDL.text_separator);
 		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
-		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Split Sentences exercise contains '+questions.length+' questions';
-		o[this.info.caller_obj.consts.GRADEOVER] = ''+questions.length;
+		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Split Sentences exercise has ' + this.base_obj.num_selected + ' sentences contained in ' + 
+														addPluralText('question', questions.length) + ".";
+		o[this.info.caller_obj.consts.GRADEOVER] = this.base_obj.num_selected;
 		return o; 
-	}	
+	}
 };
 /**
  * 3. ScrambleParagraph
@@ -146,6 +148,7 @@ LLDL.activities.DesignScrambleParagraphModule.prototype = {
 			return null;//invalid content
 		}
 		var all_docid_keys = [];
+		var num_marks = 0;	// to store number of marks in total
 		for(var i = 0; i < all_docs.length; i++){
 			var question = all_docs[i];
 			var inorderparaset = [];
@@ -165,15 +168,25 @@ LLDL.activities.DesignScrambleParagraphModule.prototype = {
 			all_question_content.push(questionparaset.join(','));
 			
 			all_docid_keys.push('docid');
+			num_marks += inorderparaset.length;
 		}
+		
 		var num_questions = this.dsp_obj.question_map.keySet().length;
+		
+		// reduce number of marks if fix is more than 0 - total marks will either be 1 less or 2 less per document 
+		// (depending on whether first and/or last paragraph is selected to be fixed)
+		var f = this.dsp_obj.fix;
+		var reduce_fact = (f < 1) ? 0 : (f < 3) ? 1 : 2;
+		num_marks -= (reduce_fact * num_questions);
+		
         o[this.info.caller_obj.consts.PARAMKEYS] = all_docid_keys.join(',');
         o[this.info.caller_obj.consts.PARAMVALUES] = this.dsp_obj.question_map.keySet().join(LLDL.text_separator);
 		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = all_question_content.join(LLDL.text_separator);
 		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = all_question_answer.join(LLDL.text_separator);
 		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
-		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Scrambled Paragraphs exercise contains '+num_questions+' questions';
-		o[this.info.caller_obj.consts.GRADEOVER] = ''+num_questions;
+		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Scrambled Paragraphs exercise contains ' + addPluralText('question', num_questions) + 
+														' and will be marked out of ' + num_marks + '.';
+		o[this.info.caller_obj.consts.GRADEOVER] = num_marks;
 		return o; 
 	}
 };
@@ -422,8 +435,8 @@ LLDL.activities.DesignHangmanModule.prototype = {
         params_o[this.info.caller_obj.consts.ACTIVITYANSWERS] = nodeanswers.join(LLDL.text_separator);
         params_o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
         params_o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Hangman exercise contains '+nodeanswers.length+' words';
-        params_o[this.info.caller_obj.consts.GRADEOVER] = ''+nodeanswers.length;
-		return params_o;		
+        params_o[this.info.caller_obj.consts.GRADEOVER] = nodeanswers.length * 10;	// maximum score is 10 per question
+		return params_o;
 	}	
 };
 /**
@@ -449,16 +462,17 @@ LLDL.activities.DesignCollocationMatchingModule.prototype = {
 		}
 		
 		var ansString = this.prepareAnsString(this.base_obj.colloText, this.base_obj.cOrderArray, this.base_obj.qOrderArray);
+				
+		var unused = this.base_obj.unusedNum;
 		
-		// make the sentence syntactically correct (adds plural if there are more than one question)
-		var qText = 'question';
-		if (totalQuestions > 1) qText += 's';
-		var unusedText = '';	// also displays if there are going to be unused collocations in the exercise
-		if (this.base_obj.unusedNum > 0){
-			unusedText += ' [' + this.base_obj.unusedNum + ' unused]';
+		// calculate how many marks will be on offer (number of collocations selected - unused amount)
+		var markCount = colloCount - unused;		
+		
+		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Collocation Matching exercise contains ' + addPluralText('question', totalQuestions) + 
+														', and will be marked out of ' + markCount + '.';
+		if (unused > 0){
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] += '<br>(' + colloCount + ' collocations are selected, and ' + unused + ' will be unused.)';
 		}
-		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Collocation Matching exercise contains '+ totalQuestions + ' ' 
-														+ qText + '. (' + colloCount + ' collocations selected' + unusedText + ')';
 
 		this.base_obj.previewExercise();
 		
@@ -466,7 +480,7 @@ LLDL.activities.DesignCollocationMatchingModule.prototype = {
 		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = 'N/A';
 		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = ansString;
 		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
-		o[this.info.caller_obj.consts.GRADEOVER] = totalQuestions;
+		o[this.info.caller_obj.consts.GRADEOVER] = markCount;
 		return o; 
 	},
 	
@@ -518,7 +532,7 @@ LLDL.activities.DesignRelatedWordsModule.prototype = {
 		var ansString = this.prepareAnsString(this.base_obj.textArray, this.base_obj.orderArray);
 		
 		var colloCount = this.base_obj.textArray.length;
-		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Related Words exercise contains ' + colloCount + ' collocations';
+		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Related Words exercise contains ' + colloCount + ' collocations.';
 		
 		this.base_obj.previewExercise();
 		
@@ -526,7 +540,7 @@ LLDL.activities.DesignRelatedWordsModule.prototype = {
 		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = 'N/A';
 		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = ansString;
 		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
-		o[this.info.caller_obj.consts.GRADEOVER] = 1;
+		o[this.info.caller_obj.consts.GRADEOVER] = colloCount;
 		return o; 
 	},
 	
@@ -558,13 +572,13 @@ LLDL.activities.DesignCollocationDominoesModule.prototype = {
 	saveExercise : function(o){ 
 		
 		// -1 as globalColloCount includes the 'half' collocation that is still being created
-		var colloCount = this.base_obj.globalColloCount -1;
+		var colloCount = this.base_obj.globalColloCount - 1;
 				
 		// If there are no questions set, inform the user to edit the exercise
 		if (colloCount < 2){
 			o[this.info.caller_obj.consts.CONTENTSUMMARY] = this.info.caller_obj.consts.REQUIRES_EDITING;
 		}else{
-			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Collocation Dominoes exercise contains ' + colloCount + ' dominoes';
+			o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Collocation Dominoes exercise contains ' + colloCount + ' dominoes.';
 		}	
 		
 		// Prepare the answer string that will display in the Moodle report (the chosenWordArray can be simply used 
@@ -575,7 +589,7 @@ LLDL.activities.DesignCollocationDominoesModule.prototype = {
 		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = 'N/A';
 		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = ansString;
 		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
-		o[this.info.caller_obj.consts.GRADEOVER] = 1;
+		o[this.info.caller_obj.consts.GRADEOVER] = colloCount;
 		return o; 
 	},
 
@@ -604,19 +618,19 @@ LLDL.activities.DesignCollocationGuessingModule = function (root_el, info) {
 LLDL.activities.DesignCollocationGuessingModule.prototype = {
 	saveExercise : function(o){ 
 		var qLen = this.base_obj.quest_len;
-				
+		
+		var markCount = 0;
+		
 		var ansArray = [];
 		for (var i=0; i<qLen; i++){
 			ansArray.push(this.base_obj.textArray[this.base_obj.orderArray[i]]);
+			markCount += this.base_obj.question_map[i].totalCheckCount;
 		}
 		
 		var cString = this.prepareContentString(this.base_obj.colloText, this.base_obj.orderArray);
-		
-		// make the sentence syntactically correct (adds plural if there are more than one question)
-		var qText = 'word';
-		if (qLen > 1) qText += 's';
-		
-		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Collocation Guessing exercise contains '+ qLen + ' ' + qText + ' to guess';
+				
+		o[this.info.caller_obj.consts.CONTENTSUMMARY] = 'This Collocation Guessing exercise contains ' + addPluralText('word', qLen) + ' to guess, and will be marked out of ' + 
+														markCount + '.';
 
 		this.base_obj.previewExercise();
 		
@@ -624,7 +638,7 @@ LLDL.activities.DesignCollocationGuessingModule.prototype = {
 		o[this.info.caller_obj.consts.ACTIVITYCONTENTS] = cString;
 		o[this.info.caller_obj.consts.ACTIVITYANSWERS] = ansArray.join(LLDL.text_separator);
 		o[this.info.caller_obj.consts.ACTIVITYMODE] = 'i';
-		o[this.info.caller_obj.consts.GRADEOVER] = qLen;
+		o[this.info.caller_obj.consts.GRADEOVER] = markCount;
 		return o; 
 	},
 	
@@ -645,3 +659,10 @@ LLDL.activities.DesignCollocationGuessingModule.prototype = {
 		return cArray.join(LLDL.text_separator);
 	}
 };
+
+// helper function that determines whether to add the plural on the end of a given word
+// it is passed the value that determines this fact (e.g. number of questions)
+// it also prints out the value of the number beforehand (e.g. '4 questions')
+function addPluralText(str, num){
+	return num + ' ' + ((num > 1) ? str + 's' : str);
+}
