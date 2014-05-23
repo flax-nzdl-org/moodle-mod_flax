@@ -459,8 +459,12 @@ function flax_icon_progress($txt){
 	return $icon_progress;
 }
 function register_site_id(){
+	
    //The following checking makes sure registration is only done once at the first time access
 	$cfg = get_config('flax');
+
+	//$ip = $_SERVER['SERVER_ADDR']
+	//echo '<br>'. $ip . '<br>';
 	$flax_domain = $cfg->{FLAX_SERVER_NAME};
 	$flax_port = $cfg->{FLAX_SERVER_PORT};
 	if(property_exists($cfg, REGISTERED_FLAX_SERVER) && $cfg->{REGISTERED_FLAX_SERVER} == $flax_domain.$flax_port){
@@ -472,14 +476,13 @@ function register_site_id(){
 	
 	$mdlsiteid=flax_get_mdl_site_id();
 	
-	flax_debug_log($mdlsiteid);
-	
 	$mdlsiteurl = $CFG->wwwroot;
 	$callback = '/mod/flax/submit.php';
 	$adminemail = $CFG->supportemail;
 	$param = 'a=pr&ro=1&rt=r&o=xml&s=MdlListCollections'.
 			'&s1.service='.MODULE_SITE_REGISTER.'&s1.mdlsiteid='.$mdlsiteid.'&s1.mdlsiteurl='.$mdlsiteurl.'&s1.callback='.$callback.'&s1.supportemail='.$CFG->supportemail;
 	$register_result = query_flax($param);
+	
 	if($register_result){
 		set_config(REGISTERED_FLAX_SERVER, $flax_domain.$flax_port, 'flax');
 	}

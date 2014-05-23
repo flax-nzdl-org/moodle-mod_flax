@@ -25,14 +25,36 @@
  *   its configured flax server (checking is done thru $cfg object), it will make contact with the flax server which in turn
  *   saves the module's info in a file called flaxAccess.txt on the server. The information will be later used by the flax
  *   server to send back exercise information, for example grades, to the moodle server for report purposes. 
- *   
- * To get the report functionality working properly when in test mode, make sure a conditional statement for the FlaxUtil.SCOREBACK_SERVICE 
- *   has been added in the <activity_name>.java file. (See a previously implemented Moodle exercise's java file for an example.)
- *   
- * There is possibly still a strange bug where a report may not get fully sent to Moodle server unless debug mode is enabled when calling send2moodle.
- *  For the moment, stick to using this.activity_obj.send2moodle(o, true) instead of (o, false). 
- *  TODO: Investigate to see if still dodgy -> if so, find fix if possible (not all that major in the scheme of things though)
+ * 
+ * UPDATE May 2014: Revamp of how sending grades back to moodle server works.
+ *   The whole module storage with flaxAccess on the server was not working sufficiently reliably. 
+ *   e.g. A user installs the moodle module on their local machine. They access it via "localhost"/127.0.0.1/internal loopback address. Their
+ *   server can talk to the main flax.nzdl.org server fine (i.e. is always making the requests, so can read the responses fine), but when it comes
+ *   to the main flax server making a call to the user's local server (using the module info in flaxAccess), this will not work, because:
+ *   a) The flaxAccess file defines the address of the user's local machine as "localhost", which is obviously not the same localhost on the flax server.
+ *   b) There is no simple way to get the actual IP address of the user's server, and even if it is known, requests may not be allowed to be directly 
+ *      access it.
+ *   The only way the flaxAccess module system was going to work was if the flax server was on the same domain as the module server (i.e. the user will also
+ *   have to install their own flax server in order to get their moodle system to work.) This is not desirable if we're encouraging users to link their moodle
+ *   module to the main flax.nzdl.org server by default.
+ *
+ *   The sending of grades used to work as follows:
+ *   The exercise currently being accessed would send a request with the exercise grade data to the flax server with a 'SCOREBACK_SERVICE' service parameter.
+ *   The flax server would then send this data to the moodle server, which was exposed to the potential issues outlined above.
+ *
+ *   The updated methodology is as follows:
+ *   The client should just send the exercise grade data to the moodle server directly. This isn't as simple as it seems though, as the exercise itself is
+ *   contained in an iframe within the main moodle page. Making an ajax call to the moodle server directly from this iframe results in a violation of the 
+ *   same-origin policy. Therefore as a workaround, the exercise in the iframe sends a postMessage (as part of the cross-document messaging API introduced with 
+ *   HTML5) which is caught by the moodle page outside of the exercise iframe. This contains the updated grade data, and consequently the moodle page can 
+ *   create an appropriate ajax request with the received exercise grade data to the actual moodle server.
+ *
+ *   The code for this methodology lies in the send2moodle method of Activity.js on the flax side, and view.php on the moodle side.
+ * 
+ *   As a consequence of this updated methodology, the whole flaxAccess/registering site id is a little redundant now. It has been left there for consistency,
+ *   and due to potential legacy functions still wanting it to exist.
  */
+ 
 /**
  * 1. ScrambleSentence
  */

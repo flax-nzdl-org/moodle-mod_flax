@@ -79,4 +79,5 @@ function flax_exit($courseid, $msg){
     if(!$activity_instance->process_submission($flax, $record, $view, $score, $responsecontent)){
     	flax_exit($course->id, 'activity instance process_submission returned false');
     }
+	echo "OK";
 ?>
